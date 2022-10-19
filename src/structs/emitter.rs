@@ -25,12 +25,13 @@ where
     K: Hash + Eq
 {
     when: Instant,
-    events: HashMap<K, Vec<Box<dyn FnOnce(&Self, V) -> ()>>>
+    events: HashMap<K, Vec<Box<dyn FnOnce(&Self, Vec<V>) -> ()>>>
 }
 
 impl<K, V> Emitter<K, V>
 where
-    K: Hash + Eq 
+    K: Hash + Eq ,
+    V: Copy + 'static
 {
     fn new() -> Self {
         Emitter {
@@ -38,11 +39,15 @@ where
             events: HashMap::new()
         }
     }
+
+    async fn next_event(&self, event_name: &K) -> V {
+		once(self, event_name).await
+	}
     
     fn on(
         &mut self,
 		event_name: &K,
-		listener: Box<dyn FnOnce(&Self, V) -> ()>
+		listener: Box<dyn FnOnce(&Self, Vec<V>) -> ()>
 	) -> Self {
 		if let None = self.events.get(event_name) {
 			self.events.insert(*event_name.clone(), vec![]);
@@ -55,13 +60,23 @@ where
     fn once(
         &self,
 		event_name: &K,
-		listener: Box<dyn FnOnce(&Self, V) -> ()> 
+		listener: Box<dyn FnOnce(&Self, Vec<V>) -> ()> 
 	) -> Self {
 		self.on(event_name, Box::new(|listener_self, args| {
 			listener(self, args);
 		}));
 
         *self
+	}
+
+    fn emit(&self, event_name: &K, args: Vec<V>) -> Self {
+        if let Some(listeners) = self.events.get(event_name) {
+            for listener in listeners {
+			    listener(self, args);
+            }
+        }		
+
+		*self
 	}
 }
 
