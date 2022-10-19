@@ -1,0 +1,14 @@
+[package]
+name = "surrealdb-client"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "1.21.2", features = ["full"] }
+tungstenite = { version = "0.17.3", features = ["native-tls"]}
+tokio-tungstenite = { version = "0.17.2", features = ["native-tls"]}
+futures = "0.3.24"
+futures-util = "0.3.24"
+url = "2.3.1"
