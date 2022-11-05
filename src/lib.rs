@@ -1,10 +1,7 @@
-pub mod surreal;
-pub mod types {
-    pub mod authentication;
-    pub mod errors;
-}
-pub mod structs {
-    pub mod emitter;
+pub mod connection {
+    pub mod error;
+    pub mod surreal_connection;
+    pub mod surreal_ws_conn;
 }
 
 #[cfg(test)]
