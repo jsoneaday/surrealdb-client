@@ -43,6 +43,10 @@ impl SurrealConnection for SurrealWsConnection {
 
         Ok(())        
     }
+
+    async fn disconnect(&mut self) {
+        let _ = self.socket.as_mut().unwrap().close(None);
+    }
 }
 
 #[cfg(test)]
@@ -59,5 +63,10 @@ mod tests {
         
         assert!(result.is_ok());
         let _ = conn.socket.unwrap().close(None).await;
+    }
+
+    #[tokio::test]
+    async fn int_verify_disconnect_is_disconnecting() {
+        todo!("needs test, but after some of the actual queries are built out");
     }
 }
