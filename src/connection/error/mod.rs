@@ -1,25 +1,22 @@
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-#[error("Surreal Error occurred")]
-pub struct SurrealError;
+pub enum SurrealError {
+    #[error("Surreal Authentication Error occurred")]
+    SurrealAuthenticationError,
 
-#[derive(Debug, Error)]
-#[error("Surreal Authentication Error occurred")]
-pub struct SurrealAuthenticationError;
+    #[error("Surreal Failed To Connect Error occurred")]
+    SurrealFailedToConnectError,
 
-#[derive(Debug, Error)]
-#[error("Surreal Connection Timeout Error occurred")]
-pub struct SurrealConnectionTimeoutError;
+    #[error("Surreal Connection Timeout Error occurred")]
+    SurrealConnectionTimeoutError,
 
-#[derive(Debug, Error)]
-#[error("Surreal No Database Selected Error occurred")]
-pub struct SurrealNoDatabaseSelectedError;
+    #[error("Surreal No Database Selected Error occurred")]
+    SurrealNoDatabaseSelectedError,
 
-#[derive(Debug, Error)]
-#[error("Surreal Not Connected Error occurred")]
-pub struct SurrealNotConnectedError;
+    #[error("Surreal Not Connected Error occurred")]
+    SurrealNotConnectedError,
 
-#[derive(Debug, Error)]
-#[error("Surreal Record Already Exists Error occurred")]
-pub struct SurrealRecordAlreadyExistsError;
+    #[error("Surreal Record Already Exists Error occurred")]
+    SurrealRecordAlreadyExistsError
+}

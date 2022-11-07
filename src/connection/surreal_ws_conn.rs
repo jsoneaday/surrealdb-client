@@ -1,11 +1,9 @@
-use tokio::net::TcpStream;
-use tokio_tungstenite::*;
+use tokio::net::{TcpStream};
+use tokio_tungstenite::{connect_async, WebSocketStream, MaybeTlsStream};
 use url::Url;
-use std::collections::BTreeMap;
-use std::time::Duration;
-use super::surreal_connection::SurrealConnection;
+//use std::collections::BTreeMap;
+use super::{surreal_connection::SurrealConnection, error::SurrealError};
 use async_trait::async_trait;
-use futures_util::{ StreamExt };
 
 pub struct SurrealWsConnection {
     use_tls: bool,
@@ -27,13 +25,39 @@ impl SurrealWsConnection {
 
 #[async_trait]
 impl SurrealConnection for SurrealWsConnection {
-    async fn connect(&mut self, timeout: Duration) {    
-        let (mut ws_socket, _) = connect_async(
-            Url::parse(format!("{}{}:{}/rpc", if self.use_tls == true { "wss://" } else { "ws://" }, self.host, self.port).as_str()).expect("")
-        )
-        .await
-        .unwrap();
+    async fn connect(&mut self) -> Result<(), SurrealError> {     
+        println!("Start connect");    
 
+        let immut_self = &*self; 
+        let conn_result = connect_async(
+            Url::parse(format!("{}{}:{}/rpc", if immut_self.use_tls == true { "wss://" } else { "ws://" }, immut_self.host, immut_self.port).as_str()).expect("")
+        )
+        .await;
+        if let Some(err) = conn_result.as_ref().err() {
+            println!("Failure: {:?}", err);
+            return Err(SurrealError::SurrealFailedToConnectError);
+        };
+        
+        let (ws_socket, _) = conn_result.unwrap();
         self.socket = Some(ws_socket);
+
+        Ok(())        
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const HOST: &str = "localhost";
+    const PORT: usize = 8000;
+
+    #[tokio::test]
+    async fn int_verify_connect_makes_connection_to_surrealdb() {
+        let mut conn = SurrealWsConnection::new(HOST, PORT, false);
+        let result = conn.connect().await;
+        
+        assert!(result.is_ok());
+        let _ = conn.socket.unwrap().close(None).await;
     }
 }
