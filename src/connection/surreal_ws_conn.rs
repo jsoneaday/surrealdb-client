@@ -1,14 +1,15 @@
-use std::borrow::{Borrow, BorrowMut};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+//use std::borrow::{Borrow, BorrowMut};
+//use tokio::io::{AsyncReadExt, AsyncWriteExt};
 #[allow(unused)]
 use futures_util::{SinkExt, StreamExt, future, pin_mut};
 use futures_util::stream::{SplitSink, SplitStream};
 use tokio::net::{TcpStream};
-use tungstenite::{Message, Result};
+use tungstenite::{Message, Result, Error};
 use tokio_tungstenite::{connect_async, WebSocketStream, MaybeTlsStream};
 //use std::collections::BTreeMap;
 use super::{error::SurrealError};
 use url::Url;
+use std::sync::Once;
 
 #[allow(unused)]
 pub struct SurrealWsConnection {
@@ -30,7 +31,7 @@ impl SurrealWsConnection {
         }
     }
 
-    async fn connect(&mut self) -> Result<(), SurrealError> {     
+    pub async fn connect(&mut self) -> Result<(), SurrealError> {     
         println!("Start connect");    
 
         let immut_self = &*self; 
@@ -51,38 +52,26 @@ impl SurrealWsConnection {
         Ok(())
     }
 
-    async fn disconnect(&mut self) {
+    pub async fn disconnect(&mut self) {
         let _ = self.writer.as_mut().unwrap().close();
     }
 
-    async fn exec<T>(&mut self) {
+    pub async fn exec(&mut self) -> Result<(), Error> {
         match &mut self.writer {
             Some(writer) => {
-                let _ = writer.send(Message::Text("test string".to_owned())).await;
+                writer.send(Message::Text("test string".to_owned())).await?;
+
+                Ok(())
             },
-            None => println!("socket is empty")
+            None => {
+                println!("socket is empty");
+                Ok(())
+            }
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
-    const HOST: &str = "localhost";
-    const PORT: usize = 8000;
-
-    #[tokio::test]
-    async fn int_verify_connect_makes_connection_to_surrealdb() {
-        let mut conn = SurrealWsConnection::new(HOST, PORT, false);
-        let result = conn.connect().await;
-        
-        assert!(result.is_ok());
-        conn.disconnect().await;
-    }
-
-    #[tokio::test]
-    async fn int_verify_disconnect_is_disconnecting() {
-        todo!("needs test, but after some of the actual queries are built out");
-    }
+    
 }

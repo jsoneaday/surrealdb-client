@@ -1,6 +1,5 @@
 pub mod connection {
     pub mod error;
-    pub mod frame_connection;
     pub mod surreal_ws_conn;
 }
 
