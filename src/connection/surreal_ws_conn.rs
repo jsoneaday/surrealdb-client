@@ -1,21 +1,22 @@
 use std::borrow::{Borrow, BorrowMut};
-
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 #[allow(unused)]
-use futures_util::{SinkExt, StreamExt};
+use futures_util::{SinkExt, StreamExt, future, pin_mut};
 use futures_util::stream::{SplitSink, SplitStream};
-use tokio::net::{TcpStream, TcpListener};
+use tokio::net::{TcpStream};
 use tungstenite::{Message, Result};
-use tokio_tungstenite::{accept_async, WebSocketStream};
+use tokio_tungstenite::{connect_async, WebSocketStream, MaybeTlsStream};
 //use std::collections::BTreeMap;
 use super::{error::SurrealError};
+use url::Url;
 
 #[allow(unused)]
 pub struct SurrealWsConnection {
     use_tls: bool,
     host: &'static str,
     port: usize,
-    writer: Option<SplitSink<WebSocketStream<TcpStream>, Message>>,
-    reader: Option<SplitStream<WebSocketStream<TcpStream>>>
+    writer: Option<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>,
+    reader: Option<SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>>
 }
 
 impl SurrealWsConnection {
@@ -33,31 +34,19 @@ impl SurrealWsConnection {
         println!("Start connect");    
 
         let immut_self = &*self; 
-        let try_listener = TcpListener::bind(format!(
-            "{}{}:{}/rpc", 
-            if immut_self.use_tls == true { "wss://" } else { "ws://" }, 
-            immut_self.host, 
-            immut_self.port
-        ).as_str()).await;
-        if let Some(err) = try_listener.as_ref().err() {
-            println!("Failed to connect: {:?}", err);
+        let conn_result = connect_async(
+            Url::parse(format!("{}{}:{}/rpc", if immut_self.use_tls == true { "wss://" } else { "ws://" }, immut_self.host, immut_self.port).as_str()).expect("")
+        )
+        .await;
+        if let Some(err) = conn_result.as_ref().err() {
+            println!("Failure: {:?}", err);
             return Err(SurrealError::SurrealFailedToConnectError);
-        }
-        let listener = try_listener.unwrap();
-
-        while let Ok((stream, _)) = listener.accept().await {
-            let conn_result = accept_async(stream).await;
-
-            if let Some(err) = conn_result.as_ref().err() {
-                println!("Failure: {:?}", err);
-                return Err(SurrealError::SurrealFailedToConnectError);
-            };
-            
-            let ws_socket = conn_result.unwrap();         
-            let (writer, reader) = ws_socket.split();
-            self.writer = Some(writer);    
-            self.reader = Some(reader);        
-        }
+        };
+        
+        let (ws_socket, _) = conn_result.unwrap();
+        let (writer, reader) = ws_socket.split();
+        self.writer = Some(writer);    
+        self.reader = Some(reader);  
 
         Ok(())
     }
@@ -89,7 +78,7 @@ mod tests {
         let result = conn.connect().await;
         
         assert!(result.is_ok());
-        let _ = conn.socket.unwrap().close(None).await;
+        conn.disconnect().await;
     }
 
     #[tokio::test]
