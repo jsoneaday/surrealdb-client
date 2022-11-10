@@ -14,7 +14,11 @@ async fn verify_connect_makes_connection_to_surrealdb() {
 
 #[tokio::test]
 async fn verify_exec_sends_message_without_error() {
-    todo!()
+    let mut fixture = FIXTURES.lock().unwrap();
+    let fixture_items = fixture.instance.as_mut().unwrap();
+    let _ = fixture_items.conn.connect().await;
+
+    let _ = fixture_items.conn.exec().await;
 }
 
 #[tokio::test]

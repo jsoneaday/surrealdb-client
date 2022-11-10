@@ -30,9 +30,7 @@ impl SurrealWsConnection {
         }
     }
 
-    pub async fn connect(&mut self) -> Result<(), SurrealError> {     
-        println!("Start connect");    
-
+    pub async fn connect(&mut self) -> Result<(), SurrealError> {    
         let immut_self = &*self; 
         let conn_result = connect_async(
             Url::parse(format!("{}{}:{}/rpc", if immut_self.use_tls == true { "wss://" } else { "ws://" }, immut_self.host, immut_self.port).as_str()).expect("")
@@ -56,13 +54,31 @@ impl SurrealWsConnection {
     }
 
     pub async fn exec(&mut self) -> Result<(), Error> {
-        match &mut self.writer {
-            Some(writer) => {
+        match (&mut self.writer, &mut self.reader) {
+            (Some(writer), Some(reader)) => {
+                println!("start writer.send");
+
                 writer.send(Message::Text("test string".to_owned())).await?;
+
+                loop {
+                    tokio::select! {
+                        msg = reader.next() => {
+                            match msg {
+                                Some(msg) => {
+                                    println!("reader received {:?}", msg);
+                                    break;
+                                },
+                                None => {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
 
                 Ok(())
             },
-            None => {
+            _ => {
                 println!("socket is empty");
                 Ok(())
             }
