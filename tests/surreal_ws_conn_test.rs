@@ -1,15 +1,15 @@
-use surrealdb_client::connection::surreal_ws_conn::SurrealWsConnection;
+mod common;
 
-const HOST: &str = "localhost";
-const PORT: usize = 8000;
+use common::{ FIXTURES };
 
 #[tokio::test]
 async fn int_verify_connect_makes_connection_to_surrealdb() {       
-    let mut conn: SurrealWsConnection = SurrealWsConnection::new(HOST, PORT, false); 
-    let result = conn.connect().await;
+    let mut fixture = FIXTURES.lock().unwrap();
+    let fixture_items = fixture.instance.as_mut().unwrap();
+    let result = fixture_items.conn.connect().await;
     
     assert!(result.is_ok());
-    conn.disconnect().await;
+    fixture_items.conn.disconnect().await;
 }
 
 #[tokio::test]

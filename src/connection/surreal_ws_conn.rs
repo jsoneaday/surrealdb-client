@@ -9,7 +9,6 @@ use tokio_tungstenite::{connect_async, WebSocketStream, MaybeTlsStream};
 //use std::collections::BTreeMap;
 use super::{error::SurrealError};
 use url::Url;
-use std::sync::Once;
 
 #[allow(unused)]
 pub struct SurrealWsConnection {
