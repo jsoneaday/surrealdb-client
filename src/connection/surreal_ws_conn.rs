@@ -3,15 +3,20 @@
 #[allow(unused)]
 use futures_util::{SinkExt, StreamExt, future, pin_mut};
 use futures_util::stream::{SplitSink, SplitStream};
+use serde::Serialize;
+use serde::ser::Serializer;
+use surrealdb::sql::Object;
 use tokio::net::{TcpStream};
 use tungstenite::{Message, Result, Error};
 use tokio_tungstenite::{connect_async, WebSocketStream, MaybeTlsStream};
 //use std::collections::BTreeMap;
-use super::{error::SurrealError};
+use super::{error::SurrealError, model::rpcrequest::RpcRequest};
 use url::Url;
+use std::sync::atomic::AtomicU64;
 
 #[allow(unused)]
 pub struct SurrealWsConnection {
+    last_request_id: AtomicU64,
     use_tls: bool,
     host: &'static str,
     port: usize,
@@ -22,6 +27,7 @@ pub struct SurrealWsConnection {
 impl SurrealWsConnection {
     pub fn new(host: &'static str, port: usize, use_tls: bool) -> Self {
         SurrealWsConnection {
+            last_request_id: AtomicU64::default(),
             use_tls,
             host,
             port,
@@ -51,6 +57,13 @@ impl SurrealWsConnection {
 
     pub async fn disconnect(&mut self) {
         let _ = self.writer.as_mut().unwrap().close();
+    }
+
+    pub async fn rpc(&mut self, method: &str, params: Vec<Object>) {
+        let rpc_req: RpcRequest = RpcRequest::new(self.last_request_id.get_mut().to_string(), method.to_owned(), params);
+
+        let json = serde_json::to_string(&rpc_req);
+        
     }
 
     pub async fn exec(&mut self) -> Result<(), Error> {
