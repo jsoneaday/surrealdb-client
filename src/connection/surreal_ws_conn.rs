@@ -3,8 +3,6 @@
 #[allow(unused)]
 use futures_util::{SinkExt, StreamExt, future, pin_mut};
 use futures_util::stream::{SplitSink, SplitStream};
-use serde::Serialize;
-use serde::ser::Serializer;
 use surrealdb::sql::Object;
 use tokio::net::{TcpStream};
 use tungstenite::{Message, Result, Error};
@@ -59,11 +57,30 @@ impl SurrealWsConnection {
         let _ = self.writer.as_mut().unwrap().close();
     }
 
-    pub async fn rpc(&mut self, method: &str, params: Vec<Object>) {
+    pub async fn rpc(&mut self, method: &str, params: Vec<Object>) -> Result<(), Error> {
         let rpc_req: RpcRequest = RpcRequest::new(self.last_request_id.get_mut().to_string(), method.to_owned(), params);
 
         let json = serde_json::to_string(&rpc_req);
-        
+
+        let _ = self.writer.as_mut().unwrap().send(Message::Text(json.unwrap()));
+
+        loop {
+            tokio::select! {
+                msg = self.reader.as_mut().unwrap().next() => {
+                    match msg {
+                        Some(msg) => {
+                            println!("received {:?}", msg);
+                            break;
+                        },
+                        None => {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        Ok(())
     }
 
     pub async fn exec(&mut self) -> Result<(), Error> {
