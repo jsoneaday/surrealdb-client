@@ -1,15 +1,4 @@
-use crate::connection::surreal_ws_conn::SurrealWsConnection;
-
-enum Method {
-    Ping,
-}
-impl Method {
-    fn as_str(&self) -> &'static str {
-        match self {
-            Method::Ping => "ping"
-        }        
-    }
-}
+use crate::connection::surreal_ws_conn::{SurrealWsConnection, Method};
 
 pub struct SurrealDriver {
     conn: SurrealWsConnection
@@ -22,9 +11,8 @@ impl SurrealDriver {
         }
     }
 
-    async fn ping(&mut self) {
-        let method = Method::Ping.as_str();
-        
-        let _ = self.conn.rpc(method, Vec::new());
+    async fn ping(&mut self) {        
+        let result = self.conn.rpc(Method::Ping, Vec::new());
+        println!("{:?}", result.await);
     }
 }
