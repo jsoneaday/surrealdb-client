@@ -2,7 +2,7 @@ mod common;
 
 use std::{collections::BTreeMap};
 
-use surrealdb_client::connection::surreal_ws_conn::Method;
+use surrealdb_client::connection::model::method::Method;
 use surrealdb::sql::Object;
 use common::FIXTURES;
 

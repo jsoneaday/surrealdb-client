@@ -9,20 +9,10 @@ use tungstenite::{Message, Result, Error};
 use tokio_tungstenite::{connect_async, WebSocketStream, MaybeTlsStream};
 //use std::collections::BTreeMap;
 use super::{error::SurrealError, model::rpcrequest::RpcRequest};
+use super::model::method::Method;
 use url::Url;
 use std::sync::atomic::AtomicU64;
 
-
-pub enum Method {
-    Ping,
-}
-impl Method {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Method::Ping => "ping"
-        }        
-    }
-}
 
 #[allow(unused)]
 pub struct SurrealWsConnection {
@@ -71,7 +61,7 @@ impl SurrealWsConnection {
 
     pub async fn rpc(&mut self, method: Method, params: Vec<Object>) -> Result<Message, Error> {
         let meth = method.as_str();
-        let rpc_req: RpcRequest = RpcRequest::new(self.last_request_id.get_mut().to_string(), meth.to_string(), params);
+        let rpc_req: RpcRequest = RpcRequest::new((*self.last_request_id.get_mut() + (1 as u64)).to_string(), meth.to_string(), params);
 
         let json = serde_json::to_string(&rpc_req);
         let json_txt = json.unwrap();
@@ -79,15 +69,16 @@ impl SurrealWsConnection {
         match (&mut self.writer, &mut self.reader) {
             (Some(writer), Some(reader)) => {
                 writer.send(Message::Text(json_txt)).await?;
-
+                
                 loop {
                     tokio::select! {
-                        msg = reader.next() => {
-                            match msg {
-                                Some(msg) => {
-                                    return msg;
+                        opt_msg = reader.next() => {
+                            match opt_msg {
+                                Some(result_msg) => {
+                                    return result_msg;
                                 },
                                 None => {
+                                    println!("nothing");
                                     break;
                                 }
                             }
@@ -137,10 +128,15 @@ impl SurrealWsConnection {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::BTreeMap;
 
     const HOST: &str = "localhost";
     const PORT: usize = 8000;
+
+    async fn get_conn() -> SurrealWsConnection {
+        let mut surreal_conn = SurrealWsConnection::new(&HOST, PORT, false);
+        let _ = surreal_conn.connect().await;
+        surreal_conn
+    }
 
     #[tokio::test]
     async fn connection_completes_successfully() {
@@ -150,22 +146,22 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn disconnect_completes_successfully() {
-        let mut surreal_conn = SurrealWsConnection::new(&HOST, PORT, false);
-        let _ = surreal_conn.connect().await;
+    async fn surreal_conn_disconnect_completes_successfully() {
+        let mut surreal_conn = get_conn().await;
 
         let result = surreal_conn.disconnect().await;
 
+        println!("{:#?}", result.as_ref());
         assert!(result.is_ok());
     }
 
     #[tokio::test]
-    async fn rpc_completes_successfully() {
-        let mut surreal_conn = SurrealWsConnection::new(&HOST, PORT, false);
-        let _ = surreal_conn.connect().await;
+    async fn surreal_conn_rpc_completes_successfully() {
+        let mut surreal_conn = get_conn().await;
 
-        let result = surreal_conn.rpc(Method::Ping, vec![Object(BTreeMap::new())]).await;
+        let result = surreal_conn.rpc(Method::Ping, Vec::new()).await;
 
+        println!("{:#?}", result.as_ref());
         assert!(result.is_ok());
     }
 }

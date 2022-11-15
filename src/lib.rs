@@ -3,6 +3,7 @@ pub mod connection {
     pub mod surreal_ws_conn;
     pub mod model {
         pub mod rpcrequest;
+        pub mod method;
     }
 }
 pub mod driver {
