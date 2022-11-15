@@ -65,6 +65,7 @@ impl SurrealWsConnection {
 
         let json = serde_json::to_string(&rpc_req);
         let json_txt = json.unwrap();
+        println!("json_txt {:#?}", json_txt);
         
         match (&mut self.writer, &mut self.reader) {
             (Some(writer), Some(reader)) => {
@@ -139,14 +140,14 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn connection_completes_successfully() {
+    async fn connection_succeeds() {
         let mut surreal_conn = SurrealWsConnection::new(&HOST, PORT, false);
         let result = surreal_conn.connect().await;
         assert!(result.is_ok());
     }
 
     #[tokio::test]
-    async fn surreal_conn_disconnect_completes_successfully() {
+    async fn surreal_conn_disconnect_succeeds() {
         let mut surreal_conn = get_conn().await;
 
         let result = surreal_conn.disconnect().await;
@@ -156,7 +157,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn surreal_conn_rpc_completes_successfully() {
+    async fn surreal_conn_rpc_succeeds() {
         let mut surreal_conn = get_conn().await;
 
         let result = surreal_conn.rpc(Method::Ping, Vec::new()).await;

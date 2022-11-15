@@ -1,7 +1,7 @@
 use crate::connection::surreal_ws_conn::SurrealWsConnection;
 use crate::connection::model::method::Method;
 use std::collections::BTreeMap;
-use surrealdb::sql::{Object, Value, Param, Idiom, Part, Ident};
+use surrealdb::sql::{Object, Value};
 
 type TungsteniteResult = Result<tungstenite::Message, tungstenite::Error>;
 
@@ -26,20 +26,18 @@ impl SurrealDriver {
         self.conn.rpc(Method::Info, Vec::new()).await
     }
 
-    async fn sign_in(&mut self, username: String, password: String) -> TungsteniteResult {
-        let mut sign_in = BTreeMap::new();
-        let username_val = Value::Param(Param::from(Idiom::from(vec![Part::Field(Ident(username))])));
-        let password_val = Value::Param(Param::from(Idiom::from(vec![Part::Field(Ident(password))])));
-        sign_in.insert("username".to_string(), username_val);
-        sign_in.insert("password".to_string(), password_val);
+    async fn sign_in(&mut self, username: &str, password: &str) -> TungsteniteResult {
+        let mut sign_in: BTreeMap<String, Value> = BTreeMap::new();
+        sign_in.insert("username".to_string(), username.into());
+        sign_in.insert("password".to_string(), password.into());
 
         self.conn.rpc(Method::SignIn, vec![Object::from(sign_in)]).await
     }
 
     async fn use_ns_db(&mut self, ns: &str, db: &str) -> TungsteniteResult {
         let mut ns_db_vals: BTreeMap<String, Value> = BTreeMap::new();
-        let ns_val = ns_db_vals.insert("NS".to_string(), ns.into());
-        let db_val = ns_db_vals.insert("DB".to_string(), db.into());
+        ns_db_vals.insert("NS".to_string(), ns.into());
+        ns_db_vals.insert("DB".to_string(), db.into());
 
         self.conn.rpc(Method::Use, vec![Object(ns_db_vals)]).await
     }
@@ -60,7 +58,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn driver_ping_completes_successfully() {
+    async fn driver_ping_succeeds() {
         let mut driver = get_driver().await;
 
         let result = driver.ping().await;
@@ -81,10 +79,10 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn driver_sign_in_successfully() {
+    async fn driver_sign_in_succeeds() {
         let mut driver = get_driver().await;
 
-        let result = driver.sign_in("superduper".to_string(), "superpass".to_string()).await;
+        let result = driver.sign_in("superduper", "superpass").await;
 
         assert_eq!(result.as_ref().is_ok(), true);
         println!("{:#?}", result.unwrap());
