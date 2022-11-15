@@ -44,6 +44,9 @@ impl SurrealDriver {
         self.conn.rpc(Method::Use, RpcParams::Array(vec![ns.to_string(), db.to_string()])).await
     }
 
+    // async fn query(&mut self, query: &str, args: BTreeMap<String, String>) -> TungsteniteResult {
+    //     self.conn.rpc(Method::Query, )
+    // } 
 }
 
 #[cfg(test)]

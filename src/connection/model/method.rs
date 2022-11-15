@@ -2,7 +2,8 @@ pub enum Method {
     Ping,
     Info,
     Use,
-    SignIn
+    SignIn,
+    Query
 }
 impl Method {
     pub fn as_str(&self) -> &'static str {
@@ -10,7 +11,8 @@ impl Method {
             Method::Ping => "ping",
             Method::Info => "info",
             Method::Use => "use",
-            Method::SignIn => "signin"
+            Method::SignIn => "signin",
+            Method::Query => "query"
         }        
     }
 }

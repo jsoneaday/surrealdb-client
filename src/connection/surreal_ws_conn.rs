@@ -10,12 +10,15 @@ use tokio_tungstenite::{connect_async, WebSocketStream, MaybeTlsStream};
 use super::{error::SurrealError, model::rpcrequest::{RpcRequest, RpcParams}};
 use super::model::method::Method;
 use url::Url;
-use std::sync::atomic::AtomicU64;
+//use std::sync::atomic::AtomicU64;
+use uuid::Uuid;
+use std::sync::{Arc, Mutex};
 
 
 #[allow(unused)]
 pub struct SurrealWsConnection {
-    last_request_id: AtomicU64,
+    //last_request_id: AtomicU64,
+    last_request_id: Arc<Mutex<Uuid>>,
     use_tls: bool,
     host: &'static str,
     port: usize,
@@ -26,7 +29,8 @@ pub struct SurrealWsConnection {
 impl SurrealWsConnection {
     pub fn new(host: &'static str, port: usize, use_tls: bool) -> Self {
         SurrealWsConnection {
-            last_request_id: AtomicU64::default(),
+            //last_request_id: AtomicU64::default(),
+            last_request_id: Arc::new(Mutex::new(Uuid::new_v4())),
             use_tls,
             host,
             port,
@@ -60,7 +64,7 @@ impl SurrealWsConnection {
 
     pub async fn rpc(&mut self, method: Method, params: RpcParams) -> Result<Message, Error> {
         let meth = method.as_str();
-        let rpc_req: RpcRequest = RpcRequest::new((*self.last_request_id.get_mut() + (1 as u64)).to_string(), meth.to_string(), params);
+        let rpc_req: RpcRequest = RpcRequest::new(self.last_request_id.lock().unwrap().to_string(), meth.to_string(), params);
 
         let json = serde_json::to_string(&rpc_req);
         let json_txt = json.unwrap();
