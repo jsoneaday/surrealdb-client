@@ -2,6 +2,7 @@ use crate::connection::surreal_ws_conn::SurrealWsConnection;
 use crate::connection::model::method::Method;
 use std::collections::BTreeMap;
 use surrealdb::sql::{Object, Value};
+use crate::connection::model::rpcrequest::{RpcParams};
 
 type TungsteniteResult = Result<tungstenite::Message, tungstenite::Error>;
 
@@ -19,19 +20,19 @@ impl SurrealDriver {
     }
 
     async fn ping(&mut self) -> TungsteniteResult{        
-        self.conn.rpc(Method::Ping, vec![Object(BTreeMap::new())]).await
+        self.conn.rpc(Method::Ping, RpcParams::Objects(vec![Object(BTreeMap::new())])).await
     }
 
     async fn info(&mut self) -> TungsteniteResult {
-        self.conn.rpc(Method::Info, Vec::new()).await
+        self.conn.rpc(Method::Info, RpcParams::Array(Vec::new())).await
     }
 
     async fn sign_in(&mut self, username: &str, password: &str) -> TungsteniteResult {
         let mut sign_in: BTreeMap<String, Value> = BTreeMap::new();
-        sign_in.insert("username".to_string(), username.into());
-        sign_in.insert("password".to_string(), password.into());
+        sign_in.insert("user".to_string(), username.into());
+        sign_in.insert("pass".to_string(), password.into());
 
-        self.conn.rpc(Method::SignIn, vec![Object::from(sign_in)]).await
+        self.conn.rpc(Method::SignIn, RpcParams::Objects(vec![Object::from(sign_in)])).await
     }
 
     async fn use_ns_db(&mut self, ns: &str, db: &str) -> TungsteniteResult {
@@ -39,7 +40,8 @@ impl SurrealDriver {
         ns_db_vals.insert("NS".to_string(), ns.into());
         ns_db_vals.insert("DB".to_string(), db.into());
 
-        self.conn.rpc(Method::Use, vec![Object(ns_db_vals)]).await
+        //self.conn.rpc(Method::Use, vec![Object(ns_db_vals)]).await
+        self.conn.rpc(Method::Use, RpcParams::Array(vec![ns.to_string(), db.to_string()])).await
     }
 
 }

@@ -1,18 +1,25 @@
 use serde::Serialize;
 use serde::ser::SerializeStruct;
-use surrealdb::sql::Object;
 use std::mem::size_of;
+use surrealdb::sql::Object;
+
+#[derive(Serialize)]
+#[serde(untagged)]
+pub enum RpcParams {
+    Objects(Vec<Object>),
+    Array(Vec<String>)
+}
 
 #[repr(C)]
 pub struct RpcRequest {
     id: String,
     method: String,
-    params: Vec<Object>
+    params: RpcParams
 }
 
 #[allow(unused)]
 impl RpcRequest {
-    pub fn new(id: String, method: String, params: Vec<Object>) -> Self {
+    pub fn new(id: String, method: String, params: RpcParams) -> Self {
         RpcRequest { 
             id, 
             method,

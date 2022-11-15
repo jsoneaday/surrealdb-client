@@ -3,12 +3,11 @@
 #[allow(unused)]
 use futures_util::{SinkExt, StreamExt, future, pin_mut};
 use futures_util::stream::{SplitSink, SplitStream};
-use surrealdb::sql::Object;
 use tokio::net::{TcpStream};
 use tungstenite::{Message, Result, Error};
 use tokio_tungstenite::{connect_async, WebSocketStream, MaybeTlsStream};
 //use std::collections::BTreeMap;
-use super::{error::SurrealError, model::rpcrequest::RpcRequest};
+use super::{error::SurrealError, model::rpcrequest::{RpcRequest, RpcParams}};
 use super::model::method::Method;
 use url::Url;
 use std::sync::atomic::AtomicU64;
@@ -59,7 +58,7 @@ impl SurrealWsConnection {
         self.writer.as_mut().unwrap().close().await
     }
 
-    pub async fn rpc(&mut self, method: Method, params: Vec<Object>) -> Result<Message, Error> {
+    pub async fn rpc(&mut self, method: Method, params: RpcParams) -> Result<Message, Error> {
         let meth = method.as_str();
         let rpc_req: RpcRequest = RpcRequest::new((*self.last_request_id.get_mut() + (1 as u64)).to_string(), meth.to_string(), params);
 
@@ -160,7 +159,7 @@ mod tests {
     async fn surreal_conn_rpc_succeeds() {
         let mut surreal_conn = get_conn().await;
 
-        let result = surreal_conn.rpc(Method::Ping, Vec::new()).await;
+        let result = surreal_conn.rpc(Method::Ping, RpcParams::Array(Vec::new())).await;
 
         println!("{:#?}", result.as_ref());
         assert!(result.is_ok());
