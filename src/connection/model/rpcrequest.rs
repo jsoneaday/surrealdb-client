@@ -1,15 +1,18 @@
 use serde::Serialize;
 use serde::ser::SerializeStruct;
 use std::mem::size_of;
-use surrealdb::sql::Object;
+use std::collections::BTreeMap;
+use surrealdb::sql::{Object, Query};
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 #[serde(untagged)]
 pub enum RpcParams {
     Objects(Vec<Object>),
-    Array(Vec<String>)
+    Array(Vec<String>),
+    Query((String, BTreeMap<String, String>))
 }
 
+#[derive(Debug)]
 #[repr(C)]
 pub struct RpcRequest {
     id: String,

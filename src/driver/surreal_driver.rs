@@ -1,7 +1,7 @@
 use crate::connection::surreal_ws_conn::SurrealWsConnection;
 use crate::connection::model::method::Method;
 use std::collections::BTreeMap;
-use surrealdb::sql::{Object, Value};
+use surrealdb::sql::{Object, Value, parse};
 use crate::connection::model::rpcrequest::{RpcParams};
 
 type TungsteniteResult = Result<tungstenite::Message, tungstenite::Error>;
@@ -44,9 +44,9 @@ impl SurrealDriver {
         self.conn.rpc(Method::Use, RpcParams::Array(vec![ns.to_string(), db.to_string()])).await
     }
 
-    // async fn query(&mut self, query: &str, args: BTreeMap<String, String>) -> TungsteniteResult {
-    //     self.conn.rpc(Method::Query, )
-    // } 
+    async fn query(&mut self, query: &str, args: BTreeMap<String, String>) -> TungsteniteResult {
+        self.conn.rpc(Method::Query, RpcParams::Query((query.to_string(), args))).await
+    } 
 }
 
 #[cfg(test)]
@@ -90,7 +90,7 @@ mod tests {
         let result = driver.sign_in("superduper", "superpass").await;
 
         assert_eq!(result.as_ref().is_ok(), true);
-        println!("{:#?}", result.unwrap());
+        println!("{:#?}", result);
     }
 
     #[tokio::test]
@@ -98,6 +98,17 @@ mod tests {
         let mut driver = get_driver().await;
 
         let result = driver.use_ns_db("test", "test").await;
+
+        println!("{:#?}", result);
+    }
+
+    #[tokio::test]
+    async fn driver_query_create_succeeds() {
+        let mut driver = get_driver().await;
+
+        let _ = driver.sign_in("superduper", "superpass").await;
+        let _= driver.use_ns_db("test", "test").await;
+        let result = driver.query("CREATE Employee SET firstName = 'John', lastName = 'Thompson'", BTreeMap::new()).await;
 
         println!("{:#?}", result);
     }
