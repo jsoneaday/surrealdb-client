@@ -1,10 +1,12 @@
-mod common;
+mod common {
+    pub mod fixture;
+}
 
 use std::{collections::BTreeMap};
 use surrealdb_client::connection::model::rpcrequest::RpcParams;
 use surrealdb_client::connection::model::method::Method;
 use surrealdb::sql::Object;
-use common::FIXTURES;
+use common::fixture::FIXTURES;
 
 #[tokio::test]
 async fn rpc_ping_completes_successfully() {

@@ -3,8 +3,8 @@ use std::sync::Mutex;
 use once_cell::sync::Lazy;
 
 // obviously SurrealDB must be running here
-const HOST: &str = "localhost";
-const PORT: usize = 8000;
+pub const HOST: &str = "localhost";
+pub const PORT: usize = 8000;
 
 pub struct Fixture {
     pub instance: Option<FixtureItems>    

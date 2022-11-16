@@ -1,16 +1,12 @@
-//use std::borrow::{Borrow, BorrowMut};
-//use tokio::io::{AsyncReadExt, AsyncWriteExt};
 #[allow(unused)]
 use futures_util::{SinkExt, StreamExt, future, pin_mut};
 use futures_util::stream::{SplitSink, SplitStream};
 use tokio::net::{TcpStream};
 use tungstenite::{Message, Result, Error};
 use tokio_tungstenite::{connect_async, WebSocketStream, MaybeTlsStream};
-//use std::collections::BTreeMap;
 use super::{error::SurrealError, model::rpcrequest::{RpcRequest, RpcParams}};
 use super::model::method::Method;
 use url::Url;
-//use std::sync::atomic::AtomicU64;
 use uuid::Uuid;
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -68,10 +64,10 @@ impl SurrealWsConnection {
         let mut last_request_id = self.last_request_id.write().await;
         *last_request_id = Uuid::new_v4();
         let rpc_req: RpcRequest = RpcRequest::new(last_request_id.to_string(), meth.to_string(), params);
-        println!("rpc_req {:?}", &rpc_req);
+        //println!("rpc_req {:?}", &rpc_req);
         let json = serde_json::to_string(&rpc_req);
         let json_txt = json.unwrap();
-        println!("json_txt {:?}", &json_txt);
+        //println!("json_txt {:?}", &json_txt);
                 
         match (&mut self.writer, &mut self.reader) {
             (Some(writer), Some(reader)) => {
