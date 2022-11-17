@@ -2,10 +2,12 @@
 name = "surrealdb-client"
 version = "0.1.0"
 edition = "2021"
+license = "Apache 2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+async-once-cell = "0.4.2"
 async-trait = "0.1.57"
 anyhow = "1.0.66"
 bigdecimal = { version = "0.3.0", features = ["serde", "string-only"] }

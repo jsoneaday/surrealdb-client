@@ -19,6 +19,10 @@ impl SurrealDriver {
         }
     }
 
+    pub async fn disconnect(&mut self) {
+        self.conn.disconnect().await;
+    }
+
     pub async fn ping(&mut self) -> TungsteniteResult{        
         self.conn.rpc(Method::Ping, RpcParams::Objects(vec![Object(BTreeMap::new())])).await
     }

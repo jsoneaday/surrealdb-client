@@ -12,7 +12,6 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 
 
-#[allow(unused)]
 pub struct SurrealWsConnection {
     //last_request_id: AtomicU64,
     last_request_id: Arc<RwLock<Uuid>>,

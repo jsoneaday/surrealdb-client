@@ -1,37 +1,55 @@
-use surrealdb_client::connection::surreal_ws_conn::SurrealWsConnection;
-use std::sync::Mutex;
+use surrealdb_client::{connection::surreal_ws_conn::SurrealWsConnection, driver::surreal_driver::SurrealDriver};
+use std::{sync::Mutex, collections::BTreeMap};
 use once_cell::sync::Lazy;
 
 // obviously SurrealDB must be running here
 pub const HOST: &str = "localhost";
 pub const PORT: usize = 8000;
+pub const USER_NAME: &str = "superduper";
+pub const PASSWORD: &str = "superpass";
+pub const NS: &str = "test";
+pub const DB: &str = "test";
 
 pub struct Fixture {
-    pub instance: Option<FixtureItems>    
+    pub instance: Option<FixtureItem>
 }
 
 impl Fixture {
-    pub fn singleton(mut self) -> Self {
+    fn get_singleton(mut self) -> Self {
         if let None = self.instance {
-            self.instance = Some(FixtureItems {
-                conn: SurrealWsConnection::new(HOST, PORT, false)
+            self.instance = Some(FixtureItem {
+                surreal_conn: SurrealWsConnection::new(HOST, PORT, false)
             });
         }
         self
     }
+
+    pub async fn clean_db(&mut self) {
+        println!("start clean_db");
+      
+        let mut conn: SurrealWsConnection = SurrealWsConnection::new(HOST, PORT, false);
+        let _ = conn.connect().await;
+        let mut driver = SurrealDriver::new(conn);
+
+        let _ = driver.sign_in(USER_NAME, PASSWORD).await;
+        let _ = driver.use_ns_db(NS, DB).await;
+        let _ = driver.query("
+            remove namespace 'test'; \
+        ", BTreeMap::new());
+
+        println!("end clean_db");
+    }
 }
 
-pub struct FixtureItems {
-    pub conn: SurrealWsConnection
+pub struct FixtureItem {
+    pub surreal_conn: SurrealWsConnection
 }
 
-// may not use this for now
-#[allow(unused)]
 pub static FIXTURES: Lazy<Mutex<Fixture>> = Lazy::new(|| {
-    let mut empty_fixture = Fixture {
+    let mut fixture = Fixture {
         instance: None
     };
-    let set_fixture = empty_fixture.singleton();
+    fixture = fixture.get_singleton();
 
-    Mutex::new(set_fixture)
+    Mutex::new(fixture)
 });
