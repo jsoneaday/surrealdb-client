@@ -13,10 +13,12 @@ pub const PASSWORD: &str = "superpass";
 pub const NS: &str = "test";
 pub const DB: &str = "test";
 
+#[allow(unused)]
 pub struct Fixture {
     pub instance: Option<FixtureItem>
 }
 
+#[allow(unused)]
 impl Fixture {
     fn get_singleton(mut self) -> Self {
         if let None = self.instance {
@@ -48,6 +50,7 @@ pub struct FixtureItem {
     pub surreal_conn: SurrealWsConnection
 }
 
+#[allow(unused)]
 pub static FIXTURES: Lazy<Mutex<Fixture>> = Lazy::new(|| {
     let mut fixture = Fixture {
         instance: None
