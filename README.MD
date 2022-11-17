@@ -12,12 +12,19 @@ The driver contains most of the methods for doing queries on SurrealDB.
 **Examples**
 
 - Signin
+
   Available now
+
 - Use
+
   Available now
+
 - Query
+
   Available now and supports any query
+
 - Select, Insert, Update, Delete
+
   Coming soon
 
 **Check out the tests for sample code**
