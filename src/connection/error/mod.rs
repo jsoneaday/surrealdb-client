@@ -1,5 +1,6 @@
 use thiserror::Error;
 
+// this may not be used at all later
 #[derive(Debug, Error)]
 pub enum SurrealError {
     #[error("Surreal Authentication Error occurred")]
