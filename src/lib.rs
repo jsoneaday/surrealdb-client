@@ -11,7 +11,6 @@ pub mod connection {
 pub mod driver {
     pub mod surreal_driver;
 }
-pub mod sql;
 
 
 #[cfg(test)]

@@ -102,6 +102,7 @@ async fn driver_query_create_single_employee_succeeds() {
 }
 
 #[tokio::test]
+#[ignore = "not read yet"]
 async fn driver_query_create_company_employee_select_back_succeeds() {
     let mut driver = set_up().await;
 
