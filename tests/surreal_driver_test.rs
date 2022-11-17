@@ -9,7 +9,7 @@ use surrealdb_client::connection::surreal_ws_conn::SurrealWsConnection;
 use surrealdb_client::driver::surreal_driver::SurrealDriver;
 use surrealdb_client::connection::model::rpcresponse::RpcResponse;
 use common::fixture::{HOST, PORT};
-use common::datamodel::{employee::Employee, company::Company};
+use common::datamodel::{employee::Employee};
 
 async fn get_driver() -> SurrealDriver {
     let mut surreal_conn = SurrealWsConnection::new(&HOST, PORT, false);
@@ -18,28 +18,67 @@ async fn get_driver() -> SurrealDriver {
 }
 
 #[tokio::test]
+async fn driver_ping_succeeds() {
+    let mut driver = get_driver().await;
+
+    let result = driver.ping().await;
+    
+    assert!(result.is_ok())
+}
+
+#[tokio::test]
+async fn driver_info_returns_surreal_info() {
+    let mut driver = get_driver().await;
+
+    let _ = driver.use_ns_db("test", "test").await;    
+    let result = driver.info().await;
+    // todo: returns "{\"id\":\"54ece72a-f853-4d1d-bb64-22ca2bcda9ab\",\"result\":null}",
+    // which seems wrong. Need to fix.
+    println!("{:#?}", result);
+}
+
+#[tokio::test]
+async fn driver_sign_in_succeeds() {
+    let mut driver = get_driver().await;
+
+    let result = driver.sign_in("superduper", "superpass").await;
+
+    assert_eq!(result.as_ref().is_ok(), true);
+}
+
+#[tokio::test]
+async fn driver_use_ns_db_succeeds() {
+    let mut driver = get_driver().await;
+
+    let result = driver.use_ns_db("test", "test").await;
+
+    assert!(result.is_ok())
+}
+
+#[tokio::test]
 async fn driver_query_create_single_employee_succeeds() {
     let mut driver = get_driver().await;
 
     let _ = driver.sign_in("superduper", "superpass").await;
     let _= driver.use_ns_db("test", "test").await;
-    let result = driver.query("CREATE Employee SET firstName = 'John', lastName = 'Thompson'", BTreeMap::new()).await;
+    let result = driver.query("
+        CREATE Employee \
+        SET firstName = 'John', lastName = 'Thompson'
+    ", BTreeMap::new()).await;
 
     let message: Message = result.unwrap();
-    let result_obj: Result<RpcResponse<Employee>, serde_json::Error> = match message {
-    //let json = match message {
+    let result_inst: Result<RpcResponse<Employee>, serde_json::Error> = match message {
         Message::Text(txt) => {
             println!("{}", txt.as_str());
             serde_json::from_str(txt.as_str())
-            //txt
         },
         _ => {
             serde_json::from_str("")
-            //"".to_string()
         }
     };
-    //println!("test: {}", json);
-    println!("test: {:#?}", result_obj);
+    
+    let rpc_result = result_inst.unwrap();
+    assert_eq!(rpc_result.result[0].status, "OK");
 }
 
 #[tokio::test]
@@ -48,7 +87,11 @@ async fn driver_query_create_company_employee_select_back_succeeds() {
 
     let _ = driver.sign_in("superduper", "superpass").await;
     let _= driver.use_ns_db("test", "test").await;
-    let _ = driver.query("CREATE Company SET name = 'Super Big Corporation'", BTreeMap::new()).await;
+    let _ = driver.query("
+        CREATE Company SET name = 'Super Big Corporation'; \
+        CREATE Company SET name = 'Acme'; \
+        CREATE Employee SET firstName = 'John' lastName = 'Brown'; \
+    ", BTreeMap::new()).await;
 
     //println!("{:#?}", result);
 }

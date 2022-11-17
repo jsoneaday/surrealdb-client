@@ -145,6 +145,7 @@ mod tests {
     async fn connection_succeeds() {
         let mut surreal_conn = SurrealWsConnection::new(&HOST, PORT, false);
         let result = surreal_conn.connect().await;
+
         assert!(result.is_ok());
     }
 
@@ -154,7 +155,6 @@ mod tests {
 
         let result = surreal_conn.disconnect().await;
 
-        println!("{:#?}", result.as_ref());
         assert!(result.is_ok());
     }
 
@@ -164,7 +164,6 @@ mod tests {
 
         let result = surreal_conn.rpc(Method::Ping, RpcParams::Array(Vec::new())).await;
 
-        println!("{:#?}", result.as_ref());
         assert!(result.is_ok());
     }
 }

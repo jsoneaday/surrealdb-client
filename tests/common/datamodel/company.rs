@@ -1,3 +1,4 @@
+#[allow(unused)]
 pub struct Company {
-    name: String
+    pub name: String
 }

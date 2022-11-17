@@ -3,6 +3,6 @@ use super::result::Result;
 
 #[derive(Debug, Deserialize)]
 pub struct RpcResponse<T> {
-    id: String,
-    result: Vec<Result<Vec<T>>>    
+    pub id: String,
+    pub result: Vec<Result<Vec<T>>>    
 }

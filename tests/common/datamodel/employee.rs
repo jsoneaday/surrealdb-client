@@ -3,6 +3,6 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Employee {
-    first_name: String,
-    last_name: String
+    pub first_name: String,
+    pub last_name: String
 }
