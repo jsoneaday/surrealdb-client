@@ -30,14 +30,19 @@ async fn main() {
     let _ = conn.connect().await;
     let mut driver = SurrealDriver::new(conn);
 
+    // you must sign in if you are using username and password
     let _ = driver.sign_in("superduper", "superpass").await;
+    // you must always indicate a namespace and database to use
     let _= driver.use_ns_db("test", "test").await;
+
+    // any custom query can be run when using the query function
     let result = driver.query("
         create Person \
         set firstName = 'John', lastName = 'Thompson', age = 18
     ", BTreeMap::new()).await;
 
     let message: Message = result.unwrap();
+    // parse the json into a Rust type
     let result_inst: Result<RpcResponse<Person>, serde_json::Error> = match message {
         Message::Text(txt) => {
             println!("{}", txt.as_str());

@@ -18,6 +18,7 @@ async fn main() {
     let _ = conn.connect().await;
     let mut driver = SurrealDriver::new(conn);
 
+    // you must sign in if you are using username and password
     let sign_result = driver.sign_in(USER_NAME, PASSWORD).await;
     println!("{:#?}", sign_result);
 
