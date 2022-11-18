@@ -36,6 +36,8 @@ let result = driver.query("
 ", BTreeMap::new()).await; // note: you do not need to pass arguments
 ```
 
+**Check out the tests for more sample code**
+
 **Available Features**
 
 - Signin
@@ -53,7 +55,5 @@ let result = driver.query("
 - Select, Insert, Update, Delete
 
   Coming soon
-
-**Check out the tests for sample code**
 
 **PR's Are Welcome!**
