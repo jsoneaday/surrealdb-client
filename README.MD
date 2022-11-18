@@ -11,6 +11,10 @@ The driver contains most of the methods for doing queries on SurrealDB.
 
 **Examples**
 
+Coming soon ... but for now check the integration tests for working code samples
+
+**Available Features**
+
 - Signin
 
   Available now
