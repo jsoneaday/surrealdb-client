@@ -18,6 +18,24 @@ let mut conn = SurrealWsConnection::new(HOST, PORT, false);
 let _ = conn.connect().await;
 ```
 
+Creating a driver object (the main object used to make queries into surrealdb), and then signing in and using a specific namespace and database
+
+```
+let mut driver = SurrealDriver::new(conn);
+// see file run-docker.sh for starting a surrealdb instance with username and password
+let _ = driver.sign_in("superduper", "superpass").await;
+let _= driver.use_ns_db("test", "test").await;
+```
+
+Calling any arbitrary query code (this sample shows the create call)
+
+```
+let result = driver.query("
+    create Person \
+    set firstName = 'John', lastName = 'Thompson', age = 18
+", BTreeMap::new()).await;
+```
+
 **Available Features**
 
 - Signin
