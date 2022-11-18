@@ -24,7 +24,7 @@ Creating a driver object (the main object used to make queries into surrealdb), 
 let mut driver = SurrealDriver::new(conn);
 // see file run-docker.sh for starting a surrealdb instance with username and password
 let _ = driver.sign_in("superduper", "superpass").await;
-let _= driver.use_ns_db("test", "test").await;
+let _ = driver.use_ns_db("test", "test").await;
 ```
 
 Calling any arbitrary query code (this sample shows the create call)
