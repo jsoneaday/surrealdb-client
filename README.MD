@@ -33,7 +33,7 @@ let _ = driver.use_ns_db("test", "test").await;
 let result = driver.query("
     create Person \
     set firstName = 'John', lastName = 'Thompson', age = 18
-", BTreeMap::new()).await; // note: you do not need to pass arguments
+", BTreeMap::new()).await; // note: here we pass an empty BTreeMap, since you don't have to pass arguments
 ```
 
 **Check out the tests for more sample code**
