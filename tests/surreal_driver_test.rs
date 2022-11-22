@@ -121,12 +121,14 @@ async fn driver_relation_creation_of_employee_to_company_succeeds() {
     let _ = driver.sign_in("superduper", "superpass").await;
     let _= driver.use_ns_db("test", "test").await;
 
-    // create some data
+    // create some base data and get a dynamic schema going
     let _ = driver.query("
         create company SET name = 'Super Big Corporation'; \
-        create company SET name = 'Acme'; \
         create employee set firstName = 'John', lastName = 'Franklin'; \
     ", BTreeMap::new()).await;
+
+    // insert new company
+    let inserted_co_result = driver.query("insert into company (name) values ('Acme')", BTreeMap::new()).await;
 
     // select the acme company
     let mut select_co_args = BTreeMap::new();
@@ -140,10 +142,11 @@ async fn driver_relation_creation_of_employee_to_company_succeeds() {
     });
     let acme_co = acme_company_result.unwrap().result.first().unwrap();
 
-    // update franklin employee with association to acme company
+    // update Franklin employee with association to acme company
     let mut update_emp_args: BTreeMap<String, String> = BTreeMap::new();
+    update_emp_args.insert("last_name".to_string(), "Franklin".to_string());
     update_emp_args.insert("co".to_string(), String::from(&acme_co.id));
-    let updated_emp = driver.query("update employee set company = $co", update_emp_args).await;
+    let updated_emp = driver.query("update employee set company = $co where lastName = $last_name", update_emp_args).await;
     let updated_emp_response = Employee::from_result_message(&updated_emp).unwrap();
     let _ = Employee::get_first(&updated_emp_response).unwrap();
     
@@ -151,8 +154,9 @@ async fn driver_relation_creation_of_employee_to_company_succeeds() {
     let mut select_emp_args = BTreeMap::new();
     select_emp_args.insert("last_name".to_string(), "Franklin".to_string());
     let selected_emp_result = driver.query("select id, firstName, lastName, company.*.name as company from employee where lastName = $last_name", select_emp_args).await;
+    println!("{:#?}", selected_emp_result);
     let selected_emp_response = Employee::from_result_message(&selected_emp_result).unwrap();
-    let franklin_employee = Employee::get_first(&selected_emp_response).unwrap();
+    let franklin_employee = Employee::get_first(&selected_emp_response).unwrap();    
 
     assert_eq!(franklin_employee.last_name, "Franklin");
     assert_eq!(franklin_employee.company.as_ref().unwrap(), "Acme");
