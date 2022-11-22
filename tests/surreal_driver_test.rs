@@ -121,28 +121,19 @@ async fn driver_relation_creation_of_employee_to_company_succeeds() {
     let _ = driver.sign_in("superduper", "superpass").await;
     let _= driver.use_ns_db("test", "test").await;
 
-    // create some base data and get a dynamic schema going
     let _ = driver.query("
         create company SET name = 'Super Big Corporation'; \
         create employee set firstName = 'John', lastName = 'Franklin'; \
     ", BTreeMap::new()).await;
 
-    // insert new company
-    let inserted_co_result = driver.query("insert into company (name) values ('Acme')", BTreeMap::new()).await;
+    let _ = driver.query("insert into company (name) values ('Acme')", BTreeMap::new()).await;
 
-    // select the acme company
     let mut select_co_args = BTreeMap::new();
     select_co_args.insert("co_name".to_string(), "Acme".to_string());
     let selected_co = driver.query("select * from company where name = $co_name", select_co_args).await;
     let company_responses = Company::from_result_message(&selected_co).unwrap();
-    let acme_company_result = company_responses.result.iter().find(|co| {
-        co.status == "OK" && co.result.iter().any(|c| {
-            c.name == "Acme"
-        })
-    });
-    let acme_co = acme_company_result.unwrap().result.first().unwrap();
+    let acme_co = Company::get_first(&company_responses).unwrap();
 
-    // update Franklin employee with association to acme company
     let mut update_emp_args: BTreeMap<String, String> = BTreeMap::new();
     update_emp_args.insert("last_name".to_string(), "Franklin".to_string());
     update_emp_args.insert("co".to_string(), String::from(&acme_co.id));
@@ -150,11 +141,9 @@ async fn driver_relation_creation_of_employee_to_company_succeeds() {
     let updated_emp_response = Employee::from_result_message(&updated_emp).unwrap();
     let _ = Employee::get_first(&updated_emp_response).unwrap();
     
-    // select the employee with last name Franklin
     let mut select_emp_args = BTreeMap::new();
     select_emp_args.insert("last_name".to_string(), "Franklin".to_string());
     let selected_emp_result = driver.query("select id, firstName, lastName, company.*.name as company from employee where lastName = $last_name", select_emp_args).await;
-    println!("{:#?}", selected_emp_result);
     let selected_emp_response = Employee::from_result_message(&selected_emp_result).unwrap();
     let franklin_employee = Employee::get_first(&selected_emp_response).unwrap();    
 
