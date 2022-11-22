@@ -139,26 +139,21 @@ async fn driver_relation_creation_of_employee_to_company_succeeds() {
         })
     });
     let acme_co = acme_company_result.unwrap().result.first().unwrap();
+
+    // update franklin employee with association to acme company
+    let mut update_emp_args: BTreeMap<String, String> = BTreeMap::new();
+    update_emp_args.insert("co".to_string(), String::from(&acme_co.id));
+    let updated_emp = driver.query("update employee set company = $co", update_emp_args).await;
+    let updated_emp_response = Employee::from_result_message(&updated_emp).unwrap();
+    let _ = Employee::get_first(&updated_emp_response).unwrap();
     
-    // select the user with last name Franklin
+    // select the employee with last name Franklin
     let mut select_emp_args = BTreeMap::new();
     select_emp_args.insert("last_name".to_string(), "Franklin".to_string());
-    let selected_emp_result = driver.query("select * from employee where lastName = $last_name", select_emp_args).await;
+    let selected_emp_result = driver.query("select id, firstName, lastName, company.*.name as company from employee where lastName = $last_name", select_emp_args).await;
     let selected_emp_response = Employee::from_result_message(&selected_emp_result).unwrap();
-    let employee_result = selected_emp_response.result.iter().find(|emp| {
-        emp.status == "OK" && emp.result.iter().any(|e| {
-            e.last_name == "Franklin"
-        })
-    });
-    let franklin_employee = employee_result.unwrap().result.first().unwrap();
-    println!("{:#?}", franklin_employee);
+    let franklin_employee = Employee::get_first(&selected_emp_response).unwrap();
 
-    // create relationship
-    let relation_result = driver.query(
-        format!("RELATE {}->is_employee_of->{}", &franklin_employee.id, &acme_co.id).as_str(), 
-        BTreeMap::new()
-    ).await;
-    println!("{:#?}", relation_result);
-    //let relation_result = driver.query("select firstName, company.name from employee where ->is_employee_of->company fetch company, company.name", BTreeMap::new()).await;
-    //println!("{:#?}", relation_result);
+    assert_eq!(franklin_employee.last_name, "Franklin");
+    assert_eq!(franklin_employee.company.as_ref().unwrap(), "Acme");
 }

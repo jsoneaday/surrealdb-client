@@ -7,7 +7,8 @@ use surrealdb_client::connection::model::rpcresponse::RpcResponse;
 pub struct Employee {
     pub id: String,
     pub first_name: String,
-    pub last_name: String
+    pub last_name: String,
+    pub company: Option<String>
 }
 
 impl Employee {
@@ -28,5 +29,15 @@ impl Employee {
         };
 
         Some(emp_resp)
+    }
+
+    pub fn get_first<'a>(emp_response: &'a RpcResponse<Employee>) -> Option<&'a Employee> {
+        let employee_result = emp_response.result.iter().find(|emp| {
+            emp.status == "OK" && emp.result.iter().any(|e| {
+                e.last_name == "Franklin"
+            })
+        });
+
+        employee_result.unwrap().result.first()
     }
 }
