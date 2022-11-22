@@ -115,7 +115,8 @@ async fn driver_query_create_single_employee_succeeds() {
 
 #[tokio::test]
 async fn driver_relation_creation_of_employee_to_company_succeeds() {
-    let mut driver = set_up("test_query_create_co_emp", "test").await;
+    let ns = "test_query_create_co_emp";
+    let mut driver = set_up(ns, "test").await;
 
     // setup
     let _ = driver.sign_in("superduper", "superpass").await;
@@ -149,4 +150,6 @@ async fn driver_relation_creation_of_employee_to_company_succeeds() {
 
     assert_eq!(franklin_employee.last_name, "Franklin");
     assert_eq!(franklin_employee.company.as_ref().unwrap(), "Acme");
+
+    clean_up(&mut driver, ns).await;
 }
