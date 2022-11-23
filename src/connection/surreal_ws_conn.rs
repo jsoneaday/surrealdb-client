@@ -13,7 +13,6 @@ use tokio::sync::RwLock;
 
 
 pub struct SurrealWsConnection {
-    //last_request_id: AtomicU64,
     last_request_id: Arc<RwLock<Uuid>>,
     use_tls: bool,
     host: &'static str,
@@ -25,7 +24,6 @@ pub struct SurrealWsConnection {
 impl SurrealWsConnection {
     pub fn new(host: &'static str, port: usize, use_tls: bool) -> Self {
         SurrealWsConnection {
-            //last_request_id: AtomicU64::default(),
             last_request_id: Arc::new(RwLock::new(Uuid::new_v4())),
             use_tls,
             host,
