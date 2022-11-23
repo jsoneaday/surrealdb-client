@@ -63,10 +63,8 @@ impl SurrealWsConnection {
         let mut last_request_id = self.last_request_id.write().await;
         *last_request_id = Uuid::new_v4();
         let rpc_req: RpcRequest = RpcRequest::new(last_request_id.to_string(), meth.to_string(), params);
-        //println!("rpc_req {:?}", &rpc_req);
         let json = serde_json::to_string(&rpc_req);
         let json_txt = json.unwrap();
-        //println!("json_txt {:?}", &json_txt);
                 
         match (&mut self.writer, &mut self.reader) {
             (Some(writer), Some(reader)) => {
@@ -80,7 +78,6 @@ impl SurrealWsConnection {
                                     return result_msg;
                                 },
                                 None => {
-                                    println!("nothing");
                                     break;
                                 }
                             }
