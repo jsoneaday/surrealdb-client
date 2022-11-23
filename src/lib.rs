@@ -5,7 +5,7 @@ pub mod connection {
         pub mod rpcrequest;
         pub mod rpcresponse;
         pub mod method;
-        pub mod result;
+        pub mod surrealresult;
     }
 }
 pub mod driver {

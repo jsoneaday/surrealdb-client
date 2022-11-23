@@ -1,5 +1,5 @@
 use serde::{Deserialize};
-use super::result::SurrealResult;
+use super::surrealresult::SurrealResult;
 
 #[derive(Debug, Deserialize)]
 pub struct RpcResponse<T> {
