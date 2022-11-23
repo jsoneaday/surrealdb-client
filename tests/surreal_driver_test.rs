@@ -22,7 +22,7 @@ async fn set_up(ns: &str, db: &str) -> SurrealDriver {
 
     let mut args = BTreeMap::new();
     args.insert("ns".to_string(), ns.to_string());
-    let _ = driver.query("remove namespace test;", args).await;
+    let _ = driver.query("remove namespace $ns;", args).await;
 
     driver
 }
@@ -30,7 +30,7 @@ async fn set_up(ns: &str, db: &str) -> SurrealDriver {
 async fn clean_up(driver: &mut SurrealDriver, ns: &str) {
     let mut args = BTreeMap::new();
     args.insert("ns".to_string(), ns.to_string());
-    let _ = driver.query("remove namespace test;", args).await;
+    let _ = driver.query("remove namespace $ns;", args).await;
 
     driver.disconnect().await;
 }
