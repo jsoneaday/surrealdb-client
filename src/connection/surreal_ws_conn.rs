@@ -33,12 +33,13 @@ impl SurrealWsConnection {
         }
     }
 
-    pub async fn connect(&mut self) -> Result<(), SurrealError> {    
-        let immut_self = &*self; 
+    pub async fn connect(&mut self) -> Result<(), SurrealError> {   
         let conn_result = connect_async(
-            Url::parse(format!("{}{}:{}/rpc", if immut_self.use_tls == true { "wss://" } else { "ws://" }, immut_self.host, immut_self.port).as_str()).expect("")
+            Url::parse(format!("{}{}:{}/rpc", if self.use_tls == true { "wss://" } else { "ws://" }, 
+            self.host, self.port).as_str()).expect("")
         )
         .await;
+        
         if let Some(err) = conn_result.as_ref().err() {
             println!("Failure: {:?}", err);
             return Err(SurrealError::SurrealFailedToConnectError);
