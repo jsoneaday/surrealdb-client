@@ -89,38 +89,6 @@ impl SurrealWsConnection {
 
         Ok(Message::Text("invalid nothing returned".to_string()))
     }
-
-    pub async fn exec(&mut self) -> Result<(), Error> {
-        match (&mut self.writer, &mut self.reader) {
-            (Some(writer), Some(reader)) => {
-                println!("start writer.send");
-
-                writer.send(Message::Text("test string".to_owned())).await?;
-
-                loop {
-                    tokio::select! {
-                        msg = reader.next() => {
-                            match msg {
-                                Some(msg) => {
-                                    println!("reader received {:?}", msg);
-                                    break;
-                                },
-                                None => {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Ok(())
-            },
-            _ => {
-                println!("socket is empty");
-                Ok(())
-            }
-        }
-    }
 }
 
 #[cfg(test)]
