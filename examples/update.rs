@@ -64,7 +64,7 @@ async fn main() {
 }
 
 async fn set_up(ns: &str, db: &str) -> SurrealDriver { 
-    let mut surreal_conn = SurrealWsConnection::new(&HOST, PORT, false);
+    let mut surreal_conn = SurrealWsConnection::new(HOST.to_string(), PORT, false);
     let _ = surreal_conn.connect().await;
     
     let mut driver = SurrealDriver::new(surreal_conn);

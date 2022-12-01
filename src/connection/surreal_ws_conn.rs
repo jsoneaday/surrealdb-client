@@ -15,14 +15,14 @@ use tokio::sync::RwLock;
 pub struct SurrealWsConnection {
     last_request_id: Arc<RwLock<Uuid>>,
     use_tls: bool,
-    host: &'static str,
+    host: String,
     port: usize,
     writer: Option<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>,
     reader: Option<SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>>
 }
 
 impl SurrealWsConnection {
-    pub fn new(host: &'static str, port: usize, use_tls: bool) -> Self {
+    pub fn new(host: String, port: usize, use_tls: bool) -> Self {
         SurrealWsConnection {
             last_request_id: Arc::new(RwLock::new(Uuid::new_v4())),
             use_tls,
@@ -99,14 +99,14 @@ mod tests {
     const PORT: usize = 8000;
 
     async fn get_conn() -> SurrealWsConnection {
-        let mut surreal_conn = SurrealWsConnection::new(&HOST, PORT, false);
+        let mut surreal_conn = SurrealWsConnection::new(HOST.to_string(), PORT, false);
         let _ = surreal_conn.connect().await;
         surreal_conn
     }
 
     #[tokio::test]
     async fn connection_succeeds() {
-        let mut surreal_conn = SurrealWsConnection::new(&HOST, PORT, false);
+        let mut surreal_conn = SurrealWsConnection::new(HOST.to_string(), PORT, false);
         let result = surreal_conn.connect().await;
 
         assert!(result.is_ok());

@@ -23,7 +23,7 @@ impl Fixture {
     fn get_singleton(mut self) -> Self {
         if let None = self.instance {
             self.instance = Some(FixtureItem {
-                surreal_conn: SurrealWsConnection::new(HOST, PORT, false)
+                surreal_conn: SurrealWsConnection::new(HOST.to_string(), PORT, false)
             });
         }
         self
@@ -32,7 +32,7 @@ impl Fixture {
     pub async fn clean_db(&mut self) {
         println!("start clean_db");
       
-        let mut conn: SurrealWsConnection = SurrealWsConnection::new(HOST, PORT, false);
+        let mut conn: SurrealWsConnection = SurrealWsConnection::new(HOST.to_string(), PORT, false);
         let _ = conn.connect().await;
         let mut driver = SurrealDriver::new(conn);
 

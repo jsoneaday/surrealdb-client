@@ -14,7 +14,7 @@ pub const DB: &str = "test";
 
 #[tokio::main]
 async fn main() {
-    let mut conn = SurrealWsConnection::new(HOST, PORT, false);
+    let mut conn = SurrealWsConnection::new(HOST.to_string(), PORT, false);
     let _ = conn.connect().await;
     let mut driver = SurrealDriver::new(conn);
 
