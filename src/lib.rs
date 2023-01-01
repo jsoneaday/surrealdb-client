@@ -11,6 +11,11 @@ pub mod connection {
 pub mod driver {
     pub mod surreal_driver;
 }
+pub mod router {
+    pub mod message_router;
+    pub mod message;
+    pub mod msg_router_handle;
+}
 
 
 #[cfg(test)]
