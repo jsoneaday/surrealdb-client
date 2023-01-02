@@ -1,6 +1,8 @@
-use tungstenite::Message;
 
 #[derive(Debug)]
-pub struct RouterMessage {
-    pub message: Message
+pub enum RouterMessage {
+    SignIn {},
+    UseNsDb {},
+    Query {},
+    BadVariant
 }

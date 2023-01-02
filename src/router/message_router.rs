@@ -1,5 +1,4 @@
 use tokio::sync::mpsc::Receiver;
-use tungstenite::Message;
 use crate::{router::message::RouterMessage, driver::surreal_driver::SurrealDriver, connection::surreal_ws_conn::SurrealWsConnection};
 
 pub struct MsgRouterActor{
@@ -13,10 +12,10 @@ impl MsgRouterActor {
 
     pub async fn handle_msg(&self, driver: &mut SurrealDriver, msg: RouterMessage) {
         // receive message and trigger appropriate surreal call
-        match msg.message {
-            Message::Text(txt) => {
-                todo!()
-            },
+        match msg {
+            RouterMessage::SignIn {  } => { },
+            RouterMessage::UseNsDb {  } => { },
+            RouterMessage::Query {  } => { },
             _ => { panic!("Unknown message type!"); }
         }
     }
