@@ -1,5 +1,4 @@
 use tokio::sync::mpsc::Sender;
-use tungstenite::Message;
 use super::{message::RouterMessage, message_router::{run_router, MsgRouterActor}};
 use std::error::Error;
 
@@ -16,10 +15,7 @@ impl MsgRouterHandle {
         Self { sender }
     }
 
-    pub async fn send_message(&self, message: Message) -> Result<(), Box<dyn Error>> {
-        let msg = RouterMessage {
-            message
-        };
+    pub async fn send_message(&self, msg: RouterMessage) -> Result<(), Box<dyn Error>> {
         self.sender.send(msg).await?;
         Ok(())
     }

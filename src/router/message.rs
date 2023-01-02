@@ -1,6 +1,17 @@
-use tungstenite::Message;
+use std::collections::BTreeMap;
 
 #[derive(Debug)]
-pub struct RouterMessage {
-    pub message: Message
+pub enum RouterMessage {
+    SignIn {
+        username: String,
+        password: String
+    },
+    UseNsDb {
+        ns: String,
+        db: String
+    },
+    Query {
+        query_str: String,
+        args: BTreeMap<String, String>
+    }
 }
