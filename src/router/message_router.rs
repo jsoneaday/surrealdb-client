@@ -10,12 +10,19 @@ impl MsgRouterActor {
         MsgRouterActor { receiver }
     }
 
+    #[allow(unused)]
     pub async fn handle_msg(&self, driver: &mut SurrealDriver, msg: RouterMessage) {
         // receive message and trigger appropriate surreal call
         match msg {
-            RouterMessage::SignIn {  } => { },
-            RouterMessage::UseNsDb {  } => { },
-            RouterMessage::Query {  } => { },
+            RouterMessage::SignIn { username, password } => {
+
+            },
+            RouterMessage::UseNsDb { ns, db } => {
+
+            },
+            RouterMessage::Query { query_str, args } => {
+
+            },
             _ => { panic!("Unknown message type!"); }
         }
     }
