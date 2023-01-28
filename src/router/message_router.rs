@@ -1,39 +1,32 @@
 use tokio::sync::mpsc::Receiver;
-use crate::{router::message::RouterMessage, driver::surreal_driver::SurrealDriver, connection::surreal_ws_conn::SurrealWsConnection};
+use crate::{router::message::RouterMessage, driver::surreal_driver::{SurrealDriver, TungsteniteResult}};
 
-pub struct MsgRouterActor{
-    pub receiver: Receiver<RouterMessage>,
+use super::message::RouterMessageHelper;
+
+pub(crate) struct MsgRouterActor {
+    pub receiver: Receiver<RouterMessageHelper>,
 }
 
 impl MsgRouterActor {
-    pub fn new(receiver: Receiver<RouterMessage>) -> Self {
+    pub fn new(receiver: Receiver<RouterMessageHelper>) -> Self {
         MsgRouterActor { receiver }
     }
 
     #[allow(unused)]
-    pub async fn handle_msg(&self, driver: &mut SurrealDriver, msg: RouterMessage) {
+    pub async fn handle_msg(&self, driver: &mut SurrealDriver, msg_helper: RouterMessageHelper) -> TungsteniteResult {
         // receive message and trigger appropriate surreal call
-        match msg {
-            RouterMessage::SignIn { username, password } => {
-
+        match msg_helper.msg_type {
+            RouterMessage::SignIn {  username, password } => {
+                todo!()
             },
             RouterMessage::UseNsDb { ns, db } => {
-
+                todo!()
             },
             RouterMessage::Query { query_str, args } => {
-
+                todo!()
             },
             _ => { panic!("Unknown message type!"); }
         }
     }
 }
 
-pub async fn run_router(mut router: MsgRouterActor, host: String, port: usize, use_tls: bool) {
-    let mut conn = SurrealWsConnection::new(host, port, use_tls);
-    let _ = conn.connect().await;
-    let mut driver = SurrealDriver::new(conn);
-    
-    while let Some(msg) = router.receiver.recv().await {
-        router.handle_msg(&mut driver, msg).await
-    }
-}
