@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 use surrealdb::sql::{Object, Value};
 use crate::connection::model::rpcrequest::{RpcParams};
 
-type TungsteniteResult = Result<tungstenite::Message, tungstenite::Error>;
+pub type TungsteniteResult = Result<tungstenite::Message, tungstenite::Error>;
 
 #[allow(unused)]
 pub struct SurrealDriver {
@@ -23,7 +23,7 @@ impl SurrealDriver {
         self.conn.disconnect().await;
     }
 
-    pub async fn ping(&mut self) -> TungsteniteResult{        
+    pub async fn ping(&mut self) -> TungsteniteResult {        
         self.conn.rpc(Method::Ping, RpcParams::Objects(vec![Object(BTreeMap::new())])).await
     }
 

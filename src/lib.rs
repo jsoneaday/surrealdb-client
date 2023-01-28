@@ -14,7 +14,7 @@ pub mod driver {
 pub mod router {
     pub mod message_router;
     pub mod message;
-    pub mod msg_router_handle;
+    pub mod msg_router_manager;
 }
 
 
