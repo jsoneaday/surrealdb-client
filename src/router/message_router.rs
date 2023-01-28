@@ -1,5 +1,6 @@
+use tungstenite::{ Error };
 use tokio::sync::mpsc::Receiver;
-use crate::{router::message::RouterMessage, driver::surreal_driver::{SurrealDriver, TungsteniteResult}};
+use crate::{ router::message::RouterMessage, driver::surreal_driver::{ SurrealDriver } };
 
 use super::message::RouterMessageHelper;
 
@@ -13,17 +14,29 @@ impl MsgRouterActor {
     }
 
     #[allow(unused)]
-    pub async fn handle_msg(&self, driver: &mut SurrealDriver, msg_helper: RouterMessageHelper) -> TungsteniteResult {
+    pub async fn handle_msg(&self, driver: &mut SurrealDriver, msg_helper: RouterMessageHelper) -> Result<(), Error> {
         // receive message and trigger appropriate surreal call
         match msg_helper.msg_type {
-            RouterMessage::SignIn {  username, password } => {
-                todo!()
+            RouterMessage::SignIn { username, password } => {
+                let msg = driver.sign_in(&username, &password).await?;
+                
+                msg_helper.sender.send(Ok(msg));
+                
+                Ok(())
             },
             RouterMessage::UseNsDb { ns, db } => {
-                todo!()
+                let msg = driver.use_ns_db(&ns, &db).await?;
+
+                msg_helper.sender.send(Ok(msg));
+
+                Ok(())
             },
-            RouterMessage::Query { query_str, args } => {
-                todo!()
+            RouterMessage::Query { query, args } => {
+                let msg = driver.query(&query, args).await?;
+                
+                msg_helper.sender.send(Ok(msg));
+
+                Ok(())
             },
             _ => { panic!("Unknown message type!"); }
         }

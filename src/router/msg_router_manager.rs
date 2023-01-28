@@ -4,7 +4,7 @@ use super::message::{RouterMessageHelper, RouterMessageError};
 use super::{message::RouterMessage, message_router::MsgRouterActor};
 use crate::connection::surreal_ws_conn::SurrealWsConnection;
 use crate::driver::surreal_driver::SurrealDriver;
-use tungstenite::Message;
+use tungstenite::{ Message };
 
 pub struct MsgRouterManager {
     sender: Sender<RouterMessageHelper>
@@ -29,10 +29,17 @@ impl MsgRouterManager {
 
         _ = self.sender.send(msg_helper).await;
         
-        if let Ok(message) = receiver.await {
-            return Ok(message);
+        match receiver.await {
+            Ok(result) => {
+                match result {
+                    Ok(msg) => Ok(msg),
+                    Err(err) => Err(RouterMessageError::Tungstenite(err))
+                }
+            },
+            Err(err) => {
+                Err(RouterMessageError::ReceiveError(err))
+            }
         }
-        return Err(RouterMessageError("Failed to receive message's result".to_string()));
     }
 
     async fn run_router(mut router: MsgRouterActor, host: String, port: usize, use_tls: bool) {

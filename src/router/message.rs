@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
-use tungstenite::Message;
+use tungstenite::{ Error as TungsteniteError, Message };
 use tokio::sync::oneshot;
+use tokio::sync::oneshot::error::RecvError;
 
 #[derive(Debug)]
 pub enum RouterMessage {
@@ -13,7 +14,7 @@ pub enum RouterMessage {
         db: String
     },
     Query {        
-        query_str: String,
+        query: String,
         args: BTreeMap<String, String>
     }
 }
@@ -21,9 +22,12 @@ pub enum RouterMessage {
 #[allow(unused)]
 #[derive(Debug)]
 pub(crate) struct RouterMessageHelper {
-    pub sender: oneshot::Sender<Message>,
+    pub sender: oneshot::Sender<Result<Message, TungsteniteError>>,
     pub msg_type: RouterMessage,
 }
 
-#[derive(Debug, Clone)]
-pub struct RouterMessageError(pub String);
+#[derive(Debug)]
+pub enum RouterMessageError {
+    Tungstenite(TungsteniteError),
+    ReceiveError(RecvError)
+}
