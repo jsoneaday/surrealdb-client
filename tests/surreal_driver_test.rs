@@ -52,7 +52,6 @@ async fn driver_info_returns_surreal_info() {
     let ns = "test_info";
     let mut driver = set_up(ns, "test").await;
 
-    _ = driver.use_ns_db("test", "test").await;    
     let result = driver.info().await;
     // todo: returns "{\"id\":\"54ece72a-f853-4d1d-bb64-22ca2bcda9ab\",\"result\":null}",
     // which seems wrong. Need to fix.
