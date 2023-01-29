@@ -13,16 +13,16 @@ use common::datamodel::{employee::Employee, company::Company};
 
 async fn set_up(ns: &str, db: &str) -> SurrealDriver { 
     let mut surreal_conn = SurrealWsConnection::new(HOST.to_string(), PORT, false);
-    let _ = surreal_conn.connect().await;
+    _ = surreal_conn.connect().await;
     
     let mut driver = SurrealDriver::new(surreal_conn);
 
-    let _ = driver.sign_in(USER_NAME, PASSWORD).await;
-    let _ = driver.use_ns_db(ns, db).await;
+    _ = driver.sign_in(USER_NAME, PASSWORD).await;
+    _ = driver.use_ns_db(ns, db).await;
 
-    let mut args = BTreeMap::new();
-    args.insert("ns".to_string(), ns.to_string());
-    let _ = driver.query("remove namespace $ns;", args).await;
+    // let mut args = BTreeMap::new();
+    // args.insert("ns".to_string(), ns.to_string());
+    // let _ = driver.query("remove namespace $ns;", args).await;
 
     driver
 }
@@ -30,7 +30,7 @@ async fn set_up(ns: &str, db: &str) -> SurrealDriver {
 async fn clean_up(driver: &mut SurrealDriver, ns: &str) {
     let mut args = BTreeMap::new();
     args.insert("ns".to_string(), ns.to_string());
-    let _ = driver.query("remove namespace $ns;", args).await;
+    _ = driver.query("remove namespace $ns;", args).await;
 
     driver.disconnect().await;
 }
@@ -52,7 +52,7 @@ async fn driver_info_returns_surreal_info() {
     let ns = "test_info";
     let mut driver = set_up(ns, "test").await;
 
-    let _ = driver.use_ns_db("test", "test").await;    
+    _ = driver.use_ns_db("test", "test").await;    
     let result = driver.info().await;
     // todo: returns "{\"id\":\"54ece72a-f853-4d1d-bb64-22ca2bcda9ab\",\"result\":null}",
     // which seems wrong. Need to fix.
@@ -65,7 +65,7 @@ async fn driver_sign_in_succeeds() {
     let ns = "test_signin";
     let mut driver = set_up(ns, "test").await;
 
-    let result = driver.sign_in("superduper", "superpass").await;
+    let result = driver.sign_in(USER_NAME, PASSWORD).await;
 
     assert!(result.is_ok());
     clean_up(&mut driver, ns).await;
@@ -87,13 +87,11 @@ async fn driver_query_create_single_employee_succeeds() {
     let ns = "test_query_create_single_emp";
     let mut driver = set_up(ns, "test").await;
 
-    let _ = driver.sign_in("superduper", "superpass").await;
-    let _= driver.use_ns_db("test", "test").await;
     let result = driver.query("
         create Employee \
         set firstName = 'John', lastName = 'Thompson'
     ", BTreeMap::new()).await;
-
+    
     let message: Message = result.unwrap();
     let result_inst: Result<RpcResponse<Employee>, serde_json::Error> = match message {
         Message::Text(txt) => {
@@ -119,15 +117,12 @@ async fn driver_relation_creation_of_employee_to_company_succeeds() {
     let mut driver = set_up(ns, "test").await;
 
     // setup
-    let _ = driver.sign_in("superduper", "superpass").await;
-    let _= driver.use_ns_db("test", "test").await;
+    _ = driver.query("
+            create company SET name = 'Super Big Corporation'; \
+            create employee set firstName = 'John', lastName = 'Franklin'; \
+        ", BTreeMap::new()).await;
 
-    let _ = driver.query("
-        create company SET name = 'Super Big Corporation'; \
-        create employee set firstName = 'John', lastName = 'Franklin'; \
-    ", BTreeMap::new()).await;
-
-    let _ = driver.query("insert into company (name) values ('Acme')", BTreeMap::new()).await;
+    _ = driver.query("insert into company (name) values ('Acme')", BTreeMap::new()).await;
 
     let mut select_co_args = BTreeMap::new();
     select_co_args.insert("co_name".to_string(), "Acme".to_string());

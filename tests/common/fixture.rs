@@ -8,8 +8,8 @@ use once_cell::sync::Lazy;
 // obviously SurrealDB must be running here
 pub const HOST: &str = "localhost";
 pub const PORT: usize = 8000;
-pub const USER_NAME: &str = "superduper";
-pub const PASSWORD: &str = "superpass";
+pub const USER_NAME: &str = "root";
+pub const PASSWORD: &str = "root";
 pub const NS: &str = "test";
 pub const DB: &str = "test";
 
