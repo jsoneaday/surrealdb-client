@@ -1,15 +1,10 @@
-mod common {
-    pub mod fixture;
-    pub mod datamodel;
-}
-
 use tungstenite::Message;
 use std::collections::BTreeMap;
 use surrealdb_client::connection::surreal_ws_conn::SurrealWsConnection;
 use surrealdb_client::driver::surreal_driver::SurrealDriver;
 use surrealdb_client::connection::model::rpcresponse::RpcResponse;
-use common::fixture::{HOST, PORT, USER_NAME, PASSWORD};
-use common::datamodel::{employee::Employee, company::Company};
+use surrealdb_client::common_tests::fixtures::singleton_driver::{HOST, PORT, USER_NAME, PASSWORD};
+use surrealdb_client::common_tests::datamodel::{employee::Employee, company::Company};
 
 async fn set_up(ns: &str, db: &str) -> SurrealDriver { 
     let mut surreal_conn = SurrealWsConnection::new(HOST.to_string(), PORT, false);

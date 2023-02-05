@@ -52,3 +52,14 @@ impl MsgRouterManager {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::common_tests::fixtures::singleton_driver::{ HOST, PORT };
+
+    #[tokio::test]
+    async fn new_msgroutermanager_is_created_without_panic() {
+        let _ = MsgRouterManager::new(HOST.to_string(), PORT, false);        
+    }
+}

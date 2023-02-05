@@ -1,7 +1,7 @@
 // This file is work in progress, do not use
 
 
-use surrealdb_client::{connection::surreal_ws_conn::SurrealWsConnection, driver::surreal_driver::SurrealDriver};
+use crate::{connection::surreal_ws_conn::SurrealWsConnection, driver::surreal_driver::SurrealDriver};
 use std::{sync::Mutex, collections::BTreeMap};
 use once_cell::sync::Lazy;
 

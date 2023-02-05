@@ -16,6 +16,10 @@ pub mod router {
     pub mod message;
     pub mod msg_router_manager;
 }
+pub mod common_tests {
+    pub mod datamodel;
+    pub mod fixtures;
+}
 
 
 #[cfg(test)]

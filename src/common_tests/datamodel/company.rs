@@ -1,6 +1,6 @@
 use tungstenite::{Message, Error};
 use serde::Deserialize;
-use surrealdb_client::connection::model::rpcresponse::RpcResponse;
+use crate::connection::model::rpcresponse::RpcResponse;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
