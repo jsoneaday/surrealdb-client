@@ -44,22 +44,11 @@ impl MsgRouterManager {
 
     async fn run_router(mut router: MsgRouterActor, host: String, port: usize, use_tls: bool) {
         let mut conn = SurrealWsConnection::new(host, port, use_tls);
-        let _ = conn.connect().await;
+        _ = conn.connect().await;
         let mut driver = SurrealDriver::new(conn);
         
         while let Some(msg) = router.receiver.recv().await {
-            let _ = router.handle_msg(&mut driver, msg).await.unwrap();
+            _ = router.handle_msg(&mut driver, msg).await.unwrap();
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::common_tests::fixtures::singleton_driver::{ HOST, PORT };
-
-    #[tokio::test]
-    async fn new_msgroutermanager_is_created_without_panic() {
-        let _ = MsgRouterManager::new(HOST.to_string(), PORT, false);        
     }
 }

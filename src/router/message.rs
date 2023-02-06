@@ -22,7 +22,7 @@ pub enum RouterMessage {
 
 #[allow(unused)]
 #[derive(Debug)]
-pub(crate) struct RouterMessageHelper {
+pub struct RouterMessageHelper {
     pub sender: oneshot::Sender<Result<Message, TungsteniteError>>,
     pub msg_type: RouterMessage,
 }

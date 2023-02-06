@@ -29,12 +29,9 @@ impl Company {
     }
 
     pub fn get_first<'a>(co_response: &'a RpcResponse<Company>) -> Option<&'a Company> {
-        let acme_company_result = co_response.result.iter().find(|co| {
-            co.status == "OK" && co.result.iter().any(|c| {
-                c.name == "Acme"
-            })
-        });
-        
-        acme_company_result.unwrap().result.first()
+        let Some(surreal_result) = co_response.result[0].result.as_ref() else {
+            return None;
+        };
+        Some(&surreal_result[0])
     }
 }

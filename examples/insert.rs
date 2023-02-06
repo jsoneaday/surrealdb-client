@@ -47,8 +47,10 @@ async fn main() {
     };
     let company = create_co_resp.unwrap();
     let first_co = company.result.first().unwrap();
-    let inner_co = first_co.result.first().unwrap();
-    let co_id = &inner_co.id;
+    let co_id = match &first_co.result {
+        Some(vec_co) if vec_co.len() > 0 => vec_co.first().unwrap().clone().id.clone(),
+        _ => panic!("No company found!")
+    };
   
     // now select it
     let mut args = BTreeMap::new();

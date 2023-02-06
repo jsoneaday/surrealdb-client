@@ -1,3 +1,4 @@
+use surrealdb_client::connection::model::surrealresult::SURREALRESULT_STATUS_OK;
 use tungstenite::Message;
 use std::collections::BTreeMap;
 use surrealdb_client::connection::surreal_ws_conn::SurrealWsConnection;
@@ -99,7 +100,7 @@ async fn driver_query_create_single_employee_succeeds() {
     
     let rpc_result = result_inst.unwrap();
     
-    assert_eq!(rpc_result.result[0].status, "OK");
+    assert_eq!(rpc_result.result[0].status, SURREALRESULT_STATUS_OK);
     assert_eq!(rpc_result.result.len(), 1 as usize);
 
     clean_up(&mut driver, ns).await;

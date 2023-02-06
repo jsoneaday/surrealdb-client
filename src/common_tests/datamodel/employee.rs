@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use crate::connection::model::rpcresponse::RpcResponse;
+use crate::connection::model::{rpcresponse::RpcResponse};
 
 
 #[derive(Debug, Deserialize)]
@@ -32,12 +32,9 @@ impl Employee {
     }
 
     pub fn get_first<'a>(emp_response: &'a RpcResponse<Employee>) -> Option<&'a Employee> {
-        let employee_result = emp_response.result.iter().find(|emp| {
-            emp.status == "OK" && emp.result.iter().any(|e| {
-                e.last_name == "Franklin"
-            })
-        });
-
-        employee_result.unwrap().result.first()
+        let Some(surreal_result) = emp_response.result[0].result.as_ref() else {
+            return None;
+        };
+        Some(&surreal_result[0])
     }
 }
