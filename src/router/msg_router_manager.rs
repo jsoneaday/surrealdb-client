@@ -81,8 +81,8 @@ mod tests {
 
     #[tokio::test]
     async fn check_setup_msg_helper_sender_receiver_returns_objects() {
-        let _username: String = "dave".to_string();
-        let _password: String = "123".to_string();
+        let _username: &str = "dave";
+        let _password: &str = "123";
         let (msg_helper_sender, mut msg_helper_receiver) = MsgRouterBuilder::setup_msg_helper_sender_receiver();
         
         tokio::spawn(async move {
@@ -101,7 +101,7 @@ mod tests {
         let (msg_sender, _) = tokio::sync::oneshot::channel();
         _ = msg_helper_sender.send(RouterMessageHelper { 
             sender: msg_sender, 
-            msg_type: RouterMessage::SignIn { username: "dave".to_string(), password: "123".to_string() } 
+            msg_type: RouterMessage::SignIn { username: _username.to_string(), password: _password.to_string() } 
         });
     }
 }
