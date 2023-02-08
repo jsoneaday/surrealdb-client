@@ -4,7 +4,7 @@ use tokio::sync::oneshot;
 use tokio::sync::oneshot::error::RecvError;
 use tokio;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum RouterMessage {
     SignIn {
         username: String,

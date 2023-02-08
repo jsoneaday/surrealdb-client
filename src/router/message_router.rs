@@ -3,13 +3,13 @@ use tokio::sync::mpsc::Receiver;
 use crate::{ router::message::RouterMessage, driver::surreal_driver::{ SurrealDriver } };
 use super::message::RouterMessageHelper;
 
-pub(crate) struct MsgRouterActor {
+pub struct MsgRouter {
     pub receiver: Receiver<RouterMessageHelper>,
 }
 
-impl MsgRouterActor {
+impl MsgRouter {
     pub fn new(receiver: Receiver<RouterMessageHelper>) -> Self {
-        MsgRouterActor { receiver }
+        MsgRouter { receiver }
     }
 
     #[allow(unused)]
@@ -41,4 +41,3 @@ impl MsgRouterActor {
         }
     }
 }
-

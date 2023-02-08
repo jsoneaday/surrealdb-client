@@ -1,7 +1,7 @@
-use tokio::sync::mpsc::Sender;
+use tokio::sync::mpsc::{ Sender, Receiver };
 use tokio::sync::oneshot;
 use super::message::{RouterMessageHelper, RouterMessageError};
-use super::{message::RouterMessage, message_router::MsgRouterActor};
+use super::{message::RouterMessage, message_router::MsgRouter};
 use crate::connection::surreal_ws_conn::SurrealWsConnection;
 use crate::driver::surreal_driver::SurrealDriver;
 use tungstenite::{ Message };
@@ -11,16 +11,20 @@ pub struct MsgRouterManager {
 }
 
 impl MsgRouterManager {
-    pub fn new(host: String, port: usize, use_tls: bool) -> Self {
-        let (sender, receiver) = tokio::sync::mpsc::channel(100);
-        let router = MsgRouterActor::new(receiver);
-
-        tokio::spawn(Self::run_router(router, host, port, use_tls));
-
+    pub async fn build_msg_router_manager(host: String, port: usize, use_tls: bool) -> Self {
+        let sender = MsgRouterManager::build_msg_router(host, port, use_tls).await;
         Self { sender }
     }
 
-    pub async fn send_message(&self, msg: RouterMessage) -> Result<Message, RouterMessageError> {
+    async fn build_msg_router(host: String, port: usize, use_tls: bool) -> Sender<RouterMessageHelper> {
+        let (sender, receiver) = MsgRouterBuilder::setup_msg_helper_sender_receiver();
+        let msg_router = MsgRouterBuilder::build_msg_router(receiver);
+        MsgRouterBuilder::enable_msg_router_receiver(msg_router, host, port, use_tls).await;
+
+        sender
+    }
+
+    pub async fn send_msg_to_msg_router_and_wait_receive(&self, msg: RouterMessage) -> Result<Message, RouterMessageError> {
         let (sender, receiver) = oneshot::channel();
         let msg_helper = RouterMessageHelper {
             sender,
@@ -42,13 +46,31 @@ impl MsgRouterManager {
         }
     }
 
-    async fn run_router(mut router: MsgRouterActor, host: String, port: usize, use_tls: bool) {
+    
+}
+
+pub struct MsgRouterBuilder;
+
+impl MsgRouterBuilder {
+    fn setup_msg_helper_sender_receiver() -> (Sender<RouterMessageHelper>, Receiver<RouterMessageHelper>) {
+        return tokio::sync::mpsc::channel::<RouterMessageHelper>(100);
+    }
+
+    #[allow(unused)]
+    pub fn build_msg_router(receiver: Receiver<RouterMessageHelper>) -> MsgRouter {
+        MsgRouter { receiver }
+    }
+
+    #[allow(unused)]
+    pub async fn enable_msg_router_receiver(mut msg_router: MsgRouter, host: String, port: usize, use_tls: bool) {
         let mut conn = SurrealWsConnection::new(host, port, use_tls);
         _ = conn.connect().await;
         let mut driver = SurrealDriver::new(conn);
         
-        while let Some(msg) = router.receiver.recv().await {
-            _ = router.handle_msg(&mut driver, msg).await.unwrap();
-        }
+        tokio::spawn(async move {
+            while let Some(msg) = msg_router.receiver.recv().await {
+                _ = msg_router.handle_msg(&mut driver, msg).await.unwrap();
+            }
+        });        
     }
 }

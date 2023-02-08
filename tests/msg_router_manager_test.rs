@@ -13,7 +13,7 @@ use surrealdb_client::common_tests::fixtures::singleton_driver::{ HOST, PORT, US
 
 #[tokio::test]
 async fn new_msgroutermanager_is_created_without_panic() {
-    let _ = MsgRouterManager::new(HOST.to_string(), PORT, false);        
+    let _ = MsgRouterManager::build_msg_router_manager(HOST.to_string(), PORT, false).await;        
 }
 
 #[rstest]
@@ -25,8 +25,8 @@ async fn new_msgroutermanager_is_created_without_panic() {
 })]
 #[tokio::test]
 async fn send_message_and_test_valid_response_comes_back_ok(#[case] msg: RouterMessage) {
-    let router_manager = MsgRouterManager::new(HOST.to_string(), PORT, false);
-    let result = router_manager.send_message(msg).await;
+    let router_manager = MsgRouterManager::build_msg_router_manager(HOST.to_string(), PORT, false).await;
+    let result = router_manager.send_msg_to_msg_router_and_wait_receive(msg).await;
 
     assert!(result.is_err() == false);
     let ok = result.ok();
@@ -37,8 +37,8 @@ async fn send_message_and_test_valid_response_comes_back_ok(#[case] msg: RouterM
 #[tokio::test]
 async fn send_create_employee_message_and_test_valid_response_comes_back_ok() {
     // note: sometimes failures come back as non-errors with a SurrealResult.status == "ERR"!
-    let router_manager = MsgRouterManager::new(HOST.to_string(), PORT, false);
-    let result = router_manager.send_message(RouterMessage::Query { 
+    let router_manager = MsgRouterManager::build_msg_router_manager(HOST.to_string(), PORT, false).await;
+    let result = router_manager.send_msg_to_msg_router_and_wait_receive(RouterMessage::Query { 
         query: "create Employee set firstName = 'John', lastName = 'Thompson'".to_string(), 
         args: BTreeMap::new()
     }).await;
