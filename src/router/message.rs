@@ -27,6 +27,10 @@ pub struct RouterMessageHelper {
     pub msg_type: RouterMessage,
 }
 
+pub trait IRouterMessageHelperSender<T> {
+    fn sender() -> T;
+}
+
 #[derive(Debug)]
 pub enum RouterMessageError {
     Tungstenite(TungsteniteError),

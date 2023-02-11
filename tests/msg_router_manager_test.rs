@@ -8,7 +8,7 @@ use surrealdb_client::router::{
     msg_router_manager::MsgRouterManager,
     message::RouterMessage
 };
-use surrealdb_client::common_tests::fixtures::singleton_driver::{ HOST, PORT, USER_NAME, PASSWORD, NS, DB };
+use surrealdb_client::common_tests::fixtures::globals::{ HOST, PORT, USER_NAME, PASSWORD, NS, DB };
 
 
 #[tokio::test]

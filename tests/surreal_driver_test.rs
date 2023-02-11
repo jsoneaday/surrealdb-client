@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 use surrealdb_client::connection::surreal_ws_conn::SurrealWsConnection;
 use surrealdb_client::driver::surreal_driver::SurrealDriver;
 use surrealdb_client::connection::model::rpcresponse::RpcResponse;
-use surrealdb_client::common_tests::fixtures::singleton_driver::{HOST, PORT, USER_NAME, PASSWORD};
+use surrealdb_client::common_tests::fixtures::globals::{HOST, PORT, USER_NAME, PASSWORD};
 use surrealdb_client::common_tests::datamodel::{employee::Employee, company::Company};
 
 async fn set_up(ns: &str, db: &str) -> SurrealDriver { 

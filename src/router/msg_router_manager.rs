@@ -17,9 +17,11 @@ impl MsgRouterManager {
     }
 
     async fn build_msg_router(host: String, port: usize, use_tls: bool) -> Sender<RouterMessageHelper> {
-        let (sender, receiver) = MsgRouterBuilder::setup_msg_helper_sender_receiver();
+        let (sender, receiver) = 
+            MsgRouterBuilder::setup_msg_helper_sender_receiver();
         let msg_router = MsgRouterBuilder::build_msg_router(receiver);
-        MsgRouterBuilder::enable_msg_router_receiver(msg_router, host, port, use_tls).await;
+        let driver = MsgRouterBuilder::build_conn_driver(host, port, use_tls).await;
+        MsgRouterBuilder::enable_msg_router_handler(msg_router, driver).await;
 
         sender
     }
@@ -62,11 +64,14 @@ impl MsgRouterBuilder {
     }
 
     #[allow(unused)]
-    pub async fn enable_msg_router_receiver(mut msg_router: MsgRouter, host: String, port: usize, use_tls: bool) {
+    pub async fn build_conn_driver(host: String, port: usize, use_tls: bool) -> SurrealDriver {
         let mut conn = SurrealWsConnection::new(host, port, use_tls);
         _ = conn.connect().await;
-        let mut driver = SurrealDriver::new(conn);
-        
+        SurrealDriver::new(conn)
+    }
+
+    #[allow(unused)]
+    pub async fn enable_msg_router_handler(mut msg_router: MsgRouter, mut driver: SurrealDriver) {
         tokio::spawn(async move {
             while let Some(msg) = msg_router.receiver.recv().await {
                 _ = msg_router.handle_msg(&mut driver, msg).await.unwrap();
@@ -78,30 +83,54 @@ impl MsgRouterBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use mockall::predicate::*;
+    use crate::common_tests::fixtures::message_router::create_message_router;
+    use crate::common_tests::fixtures::globals::{ HOST, PORT };
+    use crate::common_tests::fixtures::channels::oneshot::get_one_shot_channel;
+    use crate::common_tests::fixtures::singleton_driver::create_driver;
+    use tungstenite::Error;
 
     #[tokio::test]
-    async fn check_setup_msg_helper_sender_receiver_returns_objects() {
+    async fn test_setup_msg_helper_sender_receiver_returns_router_msg() {
         let _username: &str = "dave";
         let _password: &str = "123";
-        let (msg_helper_sender, mut msg_helper_receiver) = MsgRouterBuilder::setup_msg_helper_sender_receiver();
+        let (msg_helper_sender, mut msg_helper_receiver) = 
+            MsgRouterBuilder::setup_msg_helper_sender_receiver();
         
         tokio::spawn(async move {
             while let Some(msg) = msg_helper_receiver.recv().await {
                 match msg.msg_type {
                     RouterMessage::SignIn { username, password } => {
-                        if _username != username || _password != password {
-                            panic!("RouterMessage fields do not match");
-                        }
+                        assert!(_username == username);
+                        assert!(_password == password);
                     },
                     _ => panic!("Wrong message type received")
                 }
             }
         });
 
-        let (msg_sender, _) = tokio::sync::oneshot::channel();
+        let (oneshot_sender, _) = get_one_shot_channel::<Result<Message, Error>>();
         _ = msg_helper_sender.send(RouterMessageHelper { 
-            sender: msg_sender, 
+            sender: oneshot_sender, 
             msg_type: RouterMessage::SignIn { username: _username.to_string(), password: _password.to_string() } 
         });
+    }
+
+    #[tokio::test]
+    async fn test_build_msg_router_created_without_panic() {
+        let (_, receiver) = tokio::sync::mpsc::channel(100);
+        MsgRouterBuilder::build_msg_router(receiver);
+    }
+
+    #[tokio::test]
+    async fn test_build_conn_driver_created_without_panic() {
+        MsgRouterBuilder::build_conn_driver(HOST.to_string(), PORT, false).await;
+    }
+
+    #[tokio::test]
+    async fn test_enable_msg_router_handler() {
+        let msg_router = create_message_router();
+        let driver = create_driver().await;
+        MsgRouterBuilder::enable_msg_router_handler(msg_router, driver).await;
     }
 }
