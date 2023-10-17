@@ -4,7 +4,7 @@ use super::message::{RouterMessageHelper, RouterMessageError};
 use super::{message::RouterMessage, message_router::MsgRouterActor};
 use crate::connection::surreal_ws_conn::SurrealWsConnection;
 use crate::driver::surreal_driver::SurrealDriver;
-use tungstenite::{ Message };
+use tungstenite::Message;
 
 pub struct MsgRouterManager {
     sender: Sender<RouterMessageHelper>

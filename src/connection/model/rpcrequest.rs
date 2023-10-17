@@ -2,7 +2,7 @@ use serde::Serialize;
 use serde::ser::SerializeStruct;
 use std::mem::size_of;
 use std::collections::BTreeMap;
-use surrealdb::sql::{Object};
+use surrealdb::sql::Object;
 
 #[derive(Serialize, Debug)]
 #[serde(untagged)]

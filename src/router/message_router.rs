@@ -1,6 +1,6 @@
-use tungstenite::{ Error };
+use tungstenite::Error;
 use tokio::sync::mpsc::Receiver;
-use crate::{ router::message::RouterMessage, driver::surreal_driver::{ SurrealDriver } };
+use crate::{ router::message::RouterMessage, driver::surreal_driver::SurrealDriver };
 
 use super::message::RouterMessageHelper;
 

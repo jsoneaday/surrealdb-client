@@ -2,7 +2,7 @@ use crate::connection::surreal_ws_conn::SurrealWsConnection;
 use crate::connection::model::method::Method;
 use std::collections::BTreeMap;
 use surrealdb::sql::{Object, Value};
-use crate::connection::model::rpcrequest::{RpcParams};
+use crate::connection::model::rpcrequest::RpcParams;
 
 pub type TungsteniteResult = Result<tungstenite::Message, tungstenite::Error>;
 
