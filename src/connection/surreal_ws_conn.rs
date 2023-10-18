@@ -1,7 +1,7 @@
 #[allow(unused)]
 use futures_util::{SinkExt, StreamExt, future, pin_mut};
 use futures_util::stream::{SplitSink, SplitStream};
-use tokio::net::{TcpStream};
+use tokio::net::TcpStream;
 use tungstenite::{Message, Result, Error};
 use tokio_tungstenite::{connect_async, WebSocketStream, MaybeTlsStream};
 use super::{error::SurrealError, model::rpcrequest::{RpcRequest, RpcParams}};

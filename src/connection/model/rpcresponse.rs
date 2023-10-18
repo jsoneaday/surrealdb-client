@@ -1,4 +1,4 @@
-use serde::{Deserialize};
+use serde::Deserialize;
 use super::surrealresult::SurrealResult;
 
 #[derive(Debug, Deserialize)]
